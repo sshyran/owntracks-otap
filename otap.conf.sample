@@ -1,0 +1,25 @@
+[defaults]
+
+# logfile defaults to `<program>.log`. It can be overriden by setting
+# OTAPLOG=/path/to/file.log in the environment 
+
+loglevel   = DEBUG
+logformat  = '%(asctime)-15s %(levelname)-5s [%(module)s] %(message)s'
+
+# Which DB driver to use. One of `sqlite', `mysql', or `postgresql'
+#
+# mysql:      dbhost, dbname, dbuser, dbpasswd
+# postgresql: dbhost, dbname, dbuser, dbpasswd
+# sqlite:     dbpath
+dbengine = mysql
+dbhost = 'localhost'
+dbname = 'otap'
+dbuser = 'jane'
+dbpasswd = 'secret'
+dbpath = "/path/to/owntracks-sqlite.db"
+
+# Where to store incoming JAR files and from where to serve outgoing JARs
+# This directory must be readable/writable by the otap.py. Pay particular
+# attention to permissions / directory-ownership when running under uWSGI.
+
+jardir = '/tmp/jars'
