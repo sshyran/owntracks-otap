@@ -6,6 +6,7 @@ __copyright__ = 'Copyright 2014 Jan-Piet Mens'
 
 import os
 import sys
+import logging
 import bottle
 import bottle_jsonrpc   # https://github.com/olemb/bottle_jsonrpc/
 from bottle import response, template, static_file, request
@@ -14,6 +15,8 @@ import owntracks
 from owntracks import cf
 from owntracks.dbschema import db, Otap, Versioncheck, createalltables, dbconn
 import time
+
+log = logging.getLogger(__name__)
 
 @bottle.route('/')
 def index():
@@ -96,19 +99,55 @@ def versioncheck(custid, word):
 
     print "device, imei: ", device, imei
 
-    version = bottle.request.body.read()
+
+    current_version = bottle.request.body.read()
     item = {
         'imei'    : imei,
-        'version' : version,
+        'version' : current_version,
         'tstamp'  : time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(int(time.time()))),
     }
     try:
         vlog = Versioncheck(**item)
         vlog.save()
     except Exception, e:
-        log.error("Cannot INSERT location for {0} into DB: {1}".format(imei, str(e)))
+        log.error("Cannot INSERT versioncheck log for {0} into DB: {1}".format(imei, str(e)))
 
-    return "HI"
+    upgrade = 0
+    settings = []
+
+    try:
+        o = Otap.get(Otap.imei == imei)
+
+        tid = o.tid or '??'
+
+        o.reported = current_version
+        o.save()
+
+        if o.block == 0:
+            upgrade = 1
+
+            try:
+                for kv in o.settings.split(';'):
+                    print "KV===", kv
+                    k, v = kv.split('=')
+                    settings.append(dict(key=k, val=v))
+            except:
+                raise
+                pass
+
+        
+    except Otap.DoesNotExist:
+        log.info("Requested OTAP IMEI {0} doesn't exist in database".format(imei))
+    except Exception, e:
+        log.error("Cannot get OTAP record for {0} from DB: {1}".format(imei, str(e)))
+
+
+    resp = {
+        'upgrade'   : upgrade,
+        'settings'  : settings,
+        }
+
+    return resp
 
 def get_midlet_version(f):
     ''' Read the .JAR (.zip) file at the open file `f' and extract its MANIFEST

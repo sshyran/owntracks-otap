@@ -49,6 +49,7 @@ class Otap(OTAPModel):
     reported        = CharField(null=True, max_length=10)
     deliver         = CharField(null=True, max_length=10)
     block           = IntegerField(null=False)
+    settings        = TextField(null=True)
 
     class Meta:
         indexes = (
