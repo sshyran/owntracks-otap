@@ -10,6 +10,10 @@ import bottle
 import bottle_jsonrpc   # https://github.com/olemb/bottle_jsonrpc/
 from bottle import response, template, static_file, request
 import zipfile
+import owntracks
+from owntracks import cf
+from owntracks.dbschema import db, Otap, Versioncheck, createalltables, dbconn
+import time
 
 @bottle.route('/')
 def index():
@@ -43,6 +47,23 @@ class Methods(object):
 bottle_jsonrpc.register('/rpc', Methods())
 
 
+def agentinfo():
+
+    device = 'unknown'
+    imei = '000000000000000'
+
+    user_agent = request.environ.get('HTTP_USER_AGENT')
+    try:
+        parts = user_agent.split('/')
+        if len(parts) == 2:
+            device = parts[0]
+            imei = parts[1]
+    except:
+        pass
+    
+    return device, imei
+
+
 #    ___ _____  _    ____  
 #   / _ \_   _|/ \  |  _ \ 
 #  | | | || | / _ \ | |_) |
@@ -59,6 +80,8 @@ bottle_jsonrpc.register('/rpc', Methods())
 #
 # curl -X POST --user-agent "XAK/123456789085147" -d 0.8.37 http://localhost:8810/version.php
 #
+# The body of the POST is the current version number of its firmware
+#
 # set versionURI=http://localhost/otap/CUST/version
 #
 # For legacy reasons, I support /custid/version and /custid/version.php (the `word'
@@ -67,11 +90,23 @@ bottle_jsonrpc.register('/rpc', Methods())
 @bottle.route('/otap/<custid>/<word:re:(version|version.php)>', method='POST')
 def versioncheck(custid, word):
 
-    user_agent = request.environ.get('HTTP_USER_AGENT')
+    device, imei = agentinfo()
 
     print "CUSTID = ", custid
 
-    print "USER_AGENT=", user_agent
+    print "device, imei: ", device, imei
+
+    version = bottle.request.body.read()
+    item = {
+        'imei'    : imei,
+        'version' : version,
+        'tstamp'  : time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(int(time.time()))),
+    }
+    try:
+        vlog = Versioncheck(**item)
+        vlog.save()
+    except Exception, e:
+        log.error("Cannot INSERT location for {0} into DB: {1}".format(imei, str(e)))
 
     return "HI"
 
@@ -167,6 +202,7 @@ def FIXME():
 #  ---------------------------------------------------------------
 
 
+createalltables()
 bottle.debug(True)
 
 if __name__ == '__main__':
