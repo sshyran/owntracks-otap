@@ -28,6 +28,7 @@ class Config(RawConfigParser):
         self.dbpath     = '/tmp/otap.db'
 
         self.jardir     = '/tmp/jars'
+        self.otckey     = None
 
         RawConfigParser.__init__(self)
         try:
