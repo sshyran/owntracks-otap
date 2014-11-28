@@ -6,3 +6,5 @@ bottle
 
 # https://github.com/gerold-penz/python-jsonrpc
 python-jsonrpc
+
+docopt==0.6.1
