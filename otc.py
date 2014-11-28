@@ -51,6 +51,9 @@ class RPC(object):
     def show(self, imei=None):
         return self._request('show', imei)
 
+    def find(self, tid=None):
+        return self._request('find', tid)
+
     def jars(self):
         return self._request('jars')
 
@@ -66,12 +69,18 @@ class RPC(object):
     def unblock(self, imei, bl=0):
         return self._request('block', imei, bl)
 
+def print_devices(data):
+    print "BLOCK IMEI             CUSTID    TID  Reported   Deliver"
+    for item in data:
+        print "%(block)5d %(imei)-16s %(custid)-10s %(tid)-3s %(reported)-10s %(deliver)-10s" % item
+
 if __name__ == '__main__':
     usage = '''OTAP Control
 
     Usage:
       otc ping
       otc show [<imei>]
+      otc find <tid>
       otc jars
       otc add <imei> <custid> <tid>
       otc deliver <imei> <version>
@@ -106,9 +115,10 @@ if __name__ == '__main__':
 
     if args['show']:
         data = rpc.show(args['<imei>'])
-        print "BLOCK IMEI             CUSTID    TID  Reported   Deliver"
-        for item in data:
-            print "%(block)5d %(imei)-16s %(custid)-10s %(tid)-3s %(reported)-10s %(deliver)-10s" % item
+        print_devices(data)
+    if args['find']:
+        data = rpc.find(args['<tid>'])
+        print_devices(data)
 
     if args['jars']:
         jarlist = rpc.jars()

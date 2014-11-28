@@ -30,10 +30,6 @@ with warnings.catch_warnings():
     import nacl.utils
     from nacl.encoding import Base64Encoder
 
-key = nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE)
-print 'otckey = "{0}"'.format(base64.b64encode(key))
-
-
 def _keycheck(secret):
     ''' <secret> is a base64-encoded, encrypted payload. Decrypt and
         verify content '''
@@ -206,6 +202,26 @@ class Methods(object):
                 'reported'  : q.reported,
                 'deliver'   : q.deliver,
                 })
+
+        return results
+
+    def find(self, otckey, tid):
+
+        results = []
+        if _keycheck(otckey) == True:
+
+            query = (Otap.select())
+            query = query.where(Otap.tid == tid)
+            query = query.order_by(Otap.imei.asc())
+            for q in query.naive():
+                results.append({
+                    'imei'      : q.imei,
+                    'custid'    : q.custid,
+                    'tid'       : q.tid,
+                    'block'     : q.block,
+                    'reported'  : q.reported,
+                    'deliver'   : q.deliver,
+                    })
 
         return results
 

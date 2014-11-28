@@ -19,3 +19,7 @@ following commands are supported:
 * `show` [_imei_]
 
 * `deliver` _imei_ _version_ where _version_ may be any installed JAR version number, the word "`*`" which means any most recent version, or "`latest`" which is the current latest version.
+
+* ping
+	if PONG then ok
+	if pong then not ok
