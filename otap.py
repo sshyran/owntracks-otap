@@ -40,11 +40,17 @@ def _keycheck(secret):
     box = nacl.secret.SecretBox(key)
 
     try:
-        plaintext = box.decrypt(base64.b64decode(secret))
+        encrypted = base64.b64decode(secret)
+        nonce = encrypted[0:24]
+        print base64.b64encode(nonce)
+        # FIXME: invalidate nonce
+
+        plaintext = box.decrypt(encrypted)
         if plaintext == b'OvEr.THe.aIR*':
             authorized = True
     except Exception, e:
         log.error("Decryption says {0}".format(str(e)))
+
 
     return authorized
 
