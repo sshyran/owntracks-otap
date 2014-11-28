@@ -145,6 +145,25 @@ class Methods(object):
 
         return "{0} will get {1} at next OTAP".format(imei, version)
 
+    def block(self, otckey, imei, bl):
+        ''' Set block in db for IMEI. If IMEI == 'ALL', then for all '''
+
+        if _keycheck(otckey) == False:
+            return "NOP"
+
+        imei = imei.replace(' ', '')
+        nrecs = None
+        try:
+            query = Otap.update(block = bl)
+            if imei != 'ALL':
+                query = query.where(Otap.imei == imei)
+            nrecs = query.execute()
+        except Exception, e:
+            s = "Cannot update db: {0}".format(str(e))
+            log.error(s)
+            return s
+        return "%s updates" % nrecs
+
     def show(self, otckey, imei):
 
         if _keycheck(otckey) == False:

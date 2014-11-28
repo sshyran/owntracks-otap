@@ -44,6 +44,11 @@ class RPC(object):
     def deliver(self, imei, version):
         return self._request('deliver', imei, version)
 
+    def block(self, imei, bl=0):
+        return self._request('block', imei, bl)
+
+    def unblock(self, imei, bl=0):
+        return self._request('block', imei, bl)
 
 if __name__ == '__main__':
     usage = '''OTAP Control
@@ -55,6 +60,7 @@ if __name__ == '__main__':
       otc add <imei> <custid> <tid>
       otc deliver <imei> <version>
       otc block [--all] [<imei>]
+      otc unblock [--all] [<imei>]
       otc (-h | --help)
       otc --version
 
@@ -98,6 +104,19 @@ if __name__ == '__main__':
     if args['deliver']:
         print rpc.deliver(args['<imei>'], args['<version>'])
 
+    if args['block'] or args['unblock']:
+        imei = args['<imei>']
+        if args['--all']:
+            imei = 'ALL'
+
+        if imei is None:
+            print "Nothing to block"
+            sys.exit(0)
+
+        bl = 0
+        if args['block']:
+            bl = 1
+        print rpc.block(imei, bl)
 
 
 
