@@ -11,6 +11,8 @@ import hashlib
 import base64
 from docopt import docopt
 import warnings
+from requests_toolbelt import MultipartEncoder
+import requests
 
 with warnings.catch_warnings():
     ''' Suppress cffi/vengine_cpy.py:166: UserWarning: reimporting '_cffi__x332a1fa9xefb54d7c' might overwrite older definitions '''
@@ -21,6 +23,16 @@ with warnings.catch_warnings():
     from nacl.encoding import Base64Encoder
 
 version = '0.12'
+secret_text = b"OvEr.THe.aIR*"
+
+def make_secret(message):
+    key = base64.b64decode(os.getenv("OTC_KEY"))
+    box = nacl.secret.SecretBox(key)
+    nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
+    encrypted = box.encrypt(message, nonce)
+
+    b64 = base64.b64encode(encrypted)
+    return b64
 
 class RPC(object):
     def __init__(self, otc_url, otc_secret):
@@ -30,15 +42,9 @@ class RPC(object):
             password = None,
             )
 
-        self.key = base64.b64decode(otc_secret)
-        self.box = nacl.secret.SecretBox(self.key)
-
     def _request(self, cmd, *args):
-        message = b"OvEr.THe.aIR*"
-        nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
-        encrypted = self.box.encrypt(message, nonce)
 
-        b64 = base64.b64encode(encrypted)
+        b64 = make_secret(secret_text)
 
         try:
             return self.server.call(cmd, b64, *args)
@@ -86,6 +92,8 @@ if __name__ == '__main__':
       otc deliver <imei> <version>
       otc block [--all] [<imei>]
       otc unblock [--all] [<imei>]
+      otc upload <filename>
+
       otc (-h | --help)
       otc --version
 
@@ -144,5 +152,30 @@ if __name__ == '__main__':
             bl = 1
         print rpc.block(imei, bl)
 
+    if args['upload']:
+        # No uploads with RPC (content too large), so we have to do this
+        # "traditionally".
+
+        filepath = args['<filename>']
+
+        try:
+            f = open(filepath, 'rb')
+        except Exception, e:
+            print "Can't open file {0}: {1}".format(filepath, str(e))
+            sys.exit(2)
+
+        url = '%s/jarupload' % otc_url
+
+        b64 = make_secret(secret_text)
+        m = MultipartEncoder(
+            fields = {
+                'otckey' : b64,
+                'jar'   : ('file', f, 'application/binary')
+            }
+        )
+
+        r = requests.post(url, data=m, headers={'Content-Type' : m.content_type})
+        print r.text
+        f.close()
 
 

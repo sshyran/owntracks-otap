@@ -419,7 +419,7 @@ def jarupload():
         log.error("Cannot save {0}: {1}".format(path, str(e)))
 
 
-    return "Thanks for the JAR: I got {0}. Stored as {1}\n".format(midlet_version, path)
+    return "Thanks for the JAR: I got {0}. Stored as {1}".format(midlet_version, path)
     # return json.dumps(resp, sort_keys=True, indent=2)
 
 @bottle.route('/dn')
