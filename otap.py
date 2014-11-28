@@ -16,6 +16,7 @@ from owntracks import cf
 from owntracks.dbschema import db, Otap, Versioncheck, createalltables, dbconn
 import time
 import hashlib
+from distutils.version import StrictVersion
 
 log = logging.getLogger(__name__)
 
@@ -28,6 +29,18 @@ def _keycheck(secret):
     if secret != my_hash:
         return False
     return True
+
+def list_jars():
+    ''' Obtain a list of JAR files, and return a sorted list of versions '''
+
+    versions = []
+    for f in os.listdir(cf.jardir):
+        path = os.path.join(cf.jardir, f)
+        if os.path.isfile(path):
+            versions.append(f.replace('.jar', ''))
+
+    versions.sort(key=StrictVersion)
+    return versions
 
 @bottle.route('/')
 def index():
@@ -54,9 +67,11 @@ class Methods(object):
 
 
 
-    def versions(self, data):
-        print data
-        return { 'status' : 'fine' }
+    def ping(self, otckey):
+        auth = _keycheck(otckey)
+        if auth is True:
+            return "PONG"
+        return "pong"
 
     def jars(self, otckey):
         ''' Return list of all JAR versions in jardir '''
@@ -64,16 +79,11 @@ class Methods(object):
         if _keycheck(otckey) == False:
             return "NOP"
 
-        jlist = []
-        for f in os.listdir(cf.jardir):
-            path = os.path.join(cf.jardir, f)
-            if os.path.isfile(path):
-                jlist.append(f.replace('.jar', ''))
+        return list_jars()
 
-        return sorted(jlist)
 
     def add_imei(self, otckey, imei, custid, tid):
-        ''' Add to database '''
+        ''' Add to database. If IMEI exists, other fields are updated. '''
 
         if _keycheck(otckey) == False:
             return "NOP"
@@ -105,6 +115,58 @@ class Methods(object):
                 log.error("Cannot store OTAP record for {0} in DB: {1}".format(imei, str(e)))
         except Exception, e:
             log.error("Cannot get OTAP record for {0} from DB: {1}".format(imei, str(e)))
+
+        return "IMEI {0} added".format(imei)
+
+    def deliver(self, otckey, imei, version):
+        ''' Update IMEI in database and set version to be delivered '''
+
+        if _keycheck(otckey) == False:
+            return "NOP"
+
+        imei = imei.replace(' ', '')
+        version = version.replace(' ', '')
+
+        if version == 'latest':
+            # Get sorted versions and take highest
+            version = list_jars()[-1]
+
+        if version != '*':
+            jarfile = "{0}/{1}.jar".format(cf.jardir, version)
+            if not os.path.isfile(jarfile):
+                return "No such version here"
+
+        try:
+            o = Otap.get(Otap.imei == imei)
+            o.deliver = version
+            o.save()
+        except:
+            return "Can't find IMEI {0} in DB".format(imei)
+
+        return "{0} will get {1} at next OTAP".format(imei, version)
+
+    def show(self, otckey, imei):
+
+        if _keycheck(otckey) == False:
+            return "NOP"
+
+        results = []
+
+        query = (Otap.select())
+        if imei is not None:
+            query = query.where(Otap.imei == imei)
+        query = query.order_by(Otap.imei.asc())
+        for q in query.naive():
+            results.append({
+                'imei'      : q.imei,
+                'custid'    : q.custid,
+                'tid'       : q.tid,
+                'block'     : q.block,
+                'reported'  : q.reported,
+                'deliver'   : q.deliver,
+                })
+
+        return results
 
 
 bottle_jsonrpc.register('/rpc', Methods())
@@ -300,7 +362,7 @@ def jarupload():
         log.error("Cannot save {0}: {1}".format(path, str(e)))
 
 
-    return "Thanks for the JAR: I got {0}. Stored as {1}".format(midlet_version, path)
+    return "Thanks for the JAR: I got {0}. Stored as {1}\n".format(midlet_version, path)
     # return json.dumps(resp, sort_keys=True, indent=2)
 
 @bottle.route('/dn')
