@@ -8,3 +8,4 @@ bottle
 python-jsonrpc
 
 docopt==0.6.1
+pynacl

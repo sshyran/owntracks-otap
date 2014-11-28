@@ -10,6 +10,15 @@ import os
 import hashlib
 import base64
 from docopt import docopt
+import warnings
+
+with warnings.catch_warnings():
+    ''' Suppress cffi/vengine_cpy.py:166: UserWarning: reimporting '_cffi__x332a1fa9xefb54d7c' might overwrite older definitions '''
+    warnings.simplefilter('ignore')
+
+    import nacl.secret
+    import nacl.utils
+    from nacl.encoding import Base64Encoder
 
 version = '0.12'
 
@@ -21,11 +30,18 @@ class RPC(object):
             password = None,
             )
 
-        self.otc_hash = hashlib.sha256(otc_secret).hexdigest()
+        self.key = base64.b64decode(otc_secret)
+        self.box = nacl.secret.SecretBox(self.key)
 
     def _request(self, cmd, *args):
+        message = b"OvEr.THe.aIR*"
+        nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
+        encrypted = self.box.encrypt(message, nonce)
+
+        b64 = base64.b64encode(encrypted)
+
         try:
-            return self.server.call(cmd, self.otc_hash, *args)
+            return self.server.call(cmd, b64, *args)
         except Exception, e:
             print("Error talking to server: {0}".format(str(e)))
 

@@ -17,18 +17,40 @@ from owntracks.dbschema import db, Otap, Versioncheck, createalltables, dbconn
 import time
 import hashlib
 from distutils.version import StrictVersion
+import warnings
+import base64
 
 log = logging.getLogger(__name__)
 
-def _keycheck(secret):
-    ''' secret is a SHA256 hex hash. Compute our own hash and compare '''
-    h = hashlib.sha256()
-    h.update(cf.otckey)
-    my_hash = h.hexdigest()
+with warnings.catch_warnings():
+    ''' Suppress cffi/vengine_cpy.py:166: UserWarning: reimporting '_cffi__x332a1fa9xefb54d7c' might overwrite older definitions '''
+    warnings.simplefilter('ignore')
 
-    if secret != my_hash:
-        return False
-    return True
+    import nacl.secret
+    import nacl.utils
+    from nacl.encoding import Base64Encoder
+
+key = nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE)
+print 'otckey = "{0}"'.format(base64.b64encode(key))
+
+
+def _keycheck(secret):
+    ''' <secret> is a base64-encoded, encrypted payload. Decrypt and
+        verify content '''
+
+    authorized = False
+
+    key = base64.b64decode(cf.otckey)
+    box = nacl.secret.SecretBox(key)
+
+    try:
+        plaintext = box.decrypt(base64.b64decode(secret))
+        if plaintext == b'OvEr.THe.aIR*':
+            authorized = True
+    except Exception, e:
+        log.error("Decryption says {0}".format(str(e)))
+
+    return authorized
 
 def list_jars():
     ''' Obtain a list of JAR files, and return a sorted list of versions '''

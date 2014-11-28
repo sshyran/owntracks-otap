@@ -6,6 +6,10 @@ empty
 curl -s -X POST -d 0.0.0 --user-agent "X1/000000000000001" http://localhost:8810/otap/JJOLIE/version
 ```
 
+Run ./generate-key.py
+copy output into otap.conf
+make variable available to OTC's environment
+
 
 ### OTC
 
