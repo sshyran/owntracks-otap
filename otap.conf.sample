@@ -23,3 +23,9 @@ dbpath = "/path/to/owntracks-sqlite.db"
 # attention to permissions / directory-ownership when running under uWSGI.
 
 jardir = '/tmp/jars'
+
+# The <secret> with which otc authenticates to the otap daemon for doing RPC.
+# This can be any longish string which needs to be configured as OTC_KEY in
+# otc's environment. The SHA256 of this secret is transferred.
+
+otckey = 'UuXTivzbm5ElXV5rZ2FsnzpmIAS3ulAiitEJMOvV'
