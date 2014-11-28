@@ -15,8 +15,19 @@ import owntracks
 from owntracks import cf
 from owntracks.dbschema import db, Otap, Versioncheck, createalltables, dbconn
 import time
+import hashlib
 
 log = logging.getLogger(__name__)
+
+def _keycheck(secret):
+    ''' secret is a SHA256 hex hash. Compute our own hash and compare '''
+    h = hashlib.sha256()
+    h.update(cf.otckey)
+    my_hash = h.hexdigest()
+
+    if secret != my_hash:
+        return False
+    return True
 
 @bottle.route('/')
 def index():
@@ -31,8 +42,6 @@ def index():
 #                     
 
 class Methods(object):
-    #def add(self, a, b):
-    #    return a + b
 
 # FIXME: we need the following commands:
 # blockall (true/false)      block all from otap
@@ -41,11 +50,62 @@ class Methods(object):
 # del IMEI
 # set IMEI deliverversion
 # set all deliverversion
+# add IMEI cust TID
+
 
 
     def versions(self, data):
         print data
         return { 'status' : 'fine' }
+
+    def jars(self, otckey):
+        ''' Return list of all JAR versions in jardir '''
+
+        if _keycheck(otckey) == False:
+            return "NOP"
+
+        jlist = []
+        for f in os.listdir(cf.jardir):
+            path = os.path.join(cf.jardir, f)
+            if os.path.isfile(path):
+                jlist.append(f.replace('.jar', ''))
+
+        return sorted(jlist)
+
+    def add_imei(self, otckey, imei, custid, tid):
+        ''' Add to database '''
+
+        if _keycheck(otckey) == False:
+            return "NOP"
+
+        imei = imei.replace(' ', '')
+        custid = custid.replace(' ', '')
+        tid  = tid.replace(' ', '')
+
+        try:
+            o = Otap.get(Otap.imei == imei)
+
+            o.custid  = custid
+            o.tid     = tid
+            o.block   = 0
+            o.save()
+        except Otap.DoesNotExist:
+            item = {
+                'imei'   : imei,
+                'custid' : custid,
+                'tid'    : tid,
+                'block'  : 0,
+            }
+            try:
+                o = Otap(**item)
+                o.save()
+
+                log.info("Stored OTAP IMEI {0} in database".format(imei))
+            except Exception, e:
+                log.error("Cannot store OTAP record for {0} in DB: {1}".format(imei, str(e)))
+        except Exception, e:
+            log.error("Cannot get OTAP record for {0} from DB: {1}".format(imei, str(e)))
+
 
 bottle_jsonrpc.register('/rpc', Methods())
 
@@ -200,13 +260,19 @@ def otap_get():
     return "thanks for GET"
 
 
-# curl -F jar=@filename http://localhost:8810/up
+# curl -F otckey=f0ac34ce3cbd715bafcae72f96bd914151c12e8d478bbb645d94d55cf54a1a14 -F jar=@filename http://localhost:8810/jarupload
 
-@bottle.route('/up', method='POST')
-def upload():
+@bottle.route('/jarupload', method='POST')
+def jarupload():
 
+    otckey  = request.forms.get('otckey')
     upload  = request.files.get('jar')
     name, ext = os.path.splitext(upload.filename)
+
+    if otckey is None:
+        return bottle.HTTPResponse(status=403, body="NO KEY")
+    if _keycheck(otckey) is False:
+        return bottle.HTTPResponse(status=403, body="BAD KEY")
 
     print "filename = ", upload.filename
     print "c-type   = ", upload.content_type
@@ -214,22 +280,27 @@ def upload():
     print "name     = ", name
     print "ext      = ", ext
 
-    midlet_version = get_midlet_version(upload.file)
+    midlet_version = None
+    try:
+        midlet_version = get_midlet_version(upload.file)
+    except Exception, e:
+        return bottle.HTTPResponse(status=415, body=str(e))
+
     if midlet_version is None:
-        return "ERROR"
+        return bottle.HTTPResponse(status=415, body="NO MIDLET VERSION")
 
-    jar_dir = "/tmp/ot"
-    
-    store_dir = "{0}/{1}".format(jar_dir, midlet_version)
+    if not os.path.exists(cf.jardir):
+        os.makedirs(cf.jardir)
 
-    if not os.path.exists(store_dir):
-        os.makedirs(store_dir)
+    path = "{0}/{1}.jar".format(cf.jardir, midlet_version)
+    try:
+        upload.save(path, overwrite=True)
+        log.info("Saved uploaded JAR as {0}".format(path))
+    except Exception, e:
+        log.error("Cannot save {0}: {1}".format(path, str(e)))
 
-    path = "{0}/OwnTracks.jar".format(store_dir)
-    upload.save(path, overwrite=True)
 
-
-    return "Thanks for the JAR: I got {0}".format(midlet_version)
+    return "Thanks for the JAR: I got {0}. Stored as {1}".format(midlet_version, path)
     # return json.dumps(resp, sort_keys=True, indent=2)
 
 @bottle.route('/dn')
