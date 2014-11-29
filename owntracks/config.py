@@ -27,6 +27,7 @@ class Config(RawConfigParser):
         self.dbport     = 3306
         self.dbpath     = '/tmp/otap.db'
 
+        self.jarurl     = 'http://localhost:8810/jars'
         self.jardir     = '/tmp/jars'
         self.otckey     = None
 

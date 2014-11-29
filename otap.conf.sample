@@ -18,6 +18,12 @@ dbuser = 'jane'
 dbpasswd = 'secret'
 dbpath = "/path/to/owntracks-sqlite.db"
 
+# The URI of the location at which the JAR files are located. The requested
+# version (e.g. 0.8.4) must be obtainable from <jarURI>/<version>.jar
+# MUST NOT end in a slash
+
+jarurl = 'http://localhost:8810/otap/jars'
+
 # Where to store incoming JAR files and from where to serve outgoing JARs
 # This directory must be readable/writable by the otap.py. Pay particular
 # attention to permissions / directory-ownership when running under uWSGI.
