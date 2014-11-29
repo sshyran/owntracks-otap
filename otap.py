@@ -266,16 +266,20 @@ class Methods(object):
 
         return results
 
-    def showconfig(self, otckey):
+    def showconfig(self, otckey, custid):
 
         url = request.url   # http://localhost/rpc
-        url = url.replace('/rpc', '')
+
+        params = {
+            'url'  :  url.replace('/rpc', ''),
+            'custid' : custid,
+        }
 
         res = ''
         if _keycheck(otckey) == True:
-            res = res + "set otapURI=%s/CUST/otap.jad\n" % url
-            res = res + "set notifyURI=%s/CUST/otap/id=@\n" % url
-            res = res + "set versionURI=%s/CUST/version\n" % url
+            res = res + "set otapURI={url}/{custid}/otap.jad\n".format(**params)
+            res = res + "set notifyURI={url}/{custid}/otap/id=@\n".format(**params)
+            res = res + "set versionURI={url}/{custid}/version\n".format(**params)
 
         return res
 

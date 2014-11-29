@@ -80,8 +80,8 @@ class RPC(object):
     def unblock(self, imei, bl=0):
         return self._request('block', imei, bl)
 
-    def showconfig(self):
-        return self._request('showconfig')
+    def showconfig(self, custid):
+        return self._request('showconfig', custid)
 
 def print_devices(data):
     print "BLOCK IMEI             CUSTID    TID  Reported   Deliver"
@@ -156,7 +156,9 @@ if __name__ == '__main__':
         print rpc.purge(args['<version>'])
 
     if args['showconfig']:
-        print rpc.showconfig()
+        custid = args['<custid>']
+
+        print rpc.showconfig(custid)
 
     if args['block'] or args['unblock']:
         imei = args['<imei>']
