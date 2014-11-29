@@ -451,7 +451,6 @@ def otap_get(custid):
             response.content_type = 'text/vnd.sun.j2me.app-descriptor'
             response.set_header('X-JARversion', deliver)
             response.headers['Content-Disposition'] = 'attachment; filename="OwnTracks.jad"'
-            response.headers['Content-Length'] = str(octets)
 
             params = {
                 'octets'    : octets,
