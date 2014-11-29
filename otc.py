@@ -100,7 +100,7 @@ if __name__ == '__main__':
       otc upload <filename>
       otc purge <version>
       otc versioncheck <imei> <custid> <version>
-      otc otap <imei>
+      otc otap <imei> <custid>
 
       otc (-h | --help)
       otc --version
@@ -196,7 +196,7 @@ if __name__ == '__main__':
         custid = args['<custid>']
         current_version = args['<version>']
 
-        print "Simulating Versioncheck for IMEI {0} ({1})...".format(imei, current_version)
+        print "Testing Versioncheck for IMEI {0} ({1})...".format(imei, current_version)
 
         headers = {
             'User-Agent'    : 'SIMU/{0}'.format(imei),
@@ -208,5 +208,25 @@ if __name__ == '__main__':
         resp = requests.post(url, headers=headers, data=payload)
 
         print json.dumps(resp.json(), indent=4)
+
+
+    if args['otap']:
+        imei = args['<imei>']
+        custid = args['<custid>']
+
+        print "Testing OTAP for cust={0}/IMEI={1} ...".format(custid, imei)
+
+        headers = {
+            'User-Agent'    : 'SIMU/{0}'.format(imei),
+        }
+
+        url = '%s/otap/%s/otap.jad' % (otc_url, custid)
+
+        resp = requests.get(url, headers=headers)
+        if resp.status_code != 200:
+            print "Response: {0} {1}".format(resp.status_code, resp.text)
+        else:
+            print(resp.headers)
+            print resp.content
 
 

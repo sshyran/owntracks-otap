@@ -19,6 +19,7 @@ import hashlib
 from distutils.version import StrictVersion
 import warnings
 import base64
+import textwrap
 
 log = logging.getLogger(__name__)
 
@@ -59,6 +60,8 @@ def list_jars():
 
     versions = []
     for f in os.listdir(cf.jardir):
+        if f.startswith('.'):
+            continue
         path = os.path.join(cf.jardir, f)
         if os.path.isfile(path):
             versions.append(f.replace('.jar', ''))
@@ -280,7 +283,7 @@ def agentinfo():
             imei = parts[1]
     except:
         pass
-    
+
     return device, imei
 
 
@@ -344,7 +347,7 @@ def versioncheck(custid, word):
                 raise
                 pass
 
-        
+
     except Otap.DoesNotExist:
         log.info("Requested OTAP IMEI {0} doesn't exist in database".format(imei))
     except Exception, e:
@@ -415,13 +418,78 @@ def otap(tid):
 # set otapURI=http://localhost/otap/otap.jad
 #
 # GET /otap.jad
-@bottle.route('/otap/otap.jad', method="GET")
-def otap_get():
-    print "GET"
-    return "thanks for GET"
+@bottle.route('/otap/<custid>/otap.jad', method="GET")
+def otap_get(custid):
+    device, imei = agentinfo()
+
+    log.info('OTAP request for cust={0} / {1} IMEI={2}'.format(custid, device, imei))
+
+    deliver = None
+    try:
+        o = Otap.get(Otap.imei == imei, Otap.custid == custid)
+
+        if o.block == 0 and o.deliver is not None:
+            deliver = o.deliver
 
 
-# curl -F otckey=f0ac34ce3cbd715bafcae72f96bd914151c12e8d478bbb645d94d55cf54a1a14 -F jar=@filename http://localhost:8810/jarupload
+    except Otap.DoesNotExist:
+        log.info("Requested OTAP cust={0}/IMEI={1} doesn't exist in database".format(custid, imei))
+        return bottle.HTTPResponse(status=404, body="NOTFOUND")
+    except Exception, e:
+        log.error("Cannot get OTAP record for {0} from DB: {1}".format(imei, str(e)))
+        return bottle.HTTPResponse(status=404, body="NOTFOUND")
+
+    if deliver is not None:
+        if deliver == '*':
+            deliver = list_jars()[-1]
+
+        jarfile = "{0}/{1}.jar".format(cf.jardir, deliver)
+        try:
+            statinfo = os.stat(jarfile)
+            octets = statinfo.st_size
+
+            response.content_type = 'text/vnd.sun.j2me.app-descriptor'
+            response.set_header('X-JARversion', deliver)
+            response.headers['Content-Disposition'] = 'attachment; filename="OwnTracks.jad"'
+            response.headers['Content-Length'] = str(octets)
+
+            params = {
+                'octets'    : octets,
+                'jarURL'    : "%s/%s.jar" % (cf.jarurl, deliver),
+                'deliver'   : deliver,
+            }
+
+            JAD = """\
+               MIDlet-1: AppMain,,general.AppMain
+               MIDlet-Jar-Size: {octets}
+               MIDlet-Jar-URL: {jarURL}
+               MIDlet-Name: OwnTracks
+               MIDlet-Permissions: javax.microedition.io.Connector.http, javax.microedition.io.Connector.https, javax.microedition.io.Connector.ssl, javax.microedition.io.Connector.socket
+               MIDlet-Vendor: Choral
+               MIDlet-Version: {deliver}
+               MicroEdition-Configuration: CLDC-1.1
+               MicroEdition-Profile: IMP-NG
+            """
+
+            return textwrap.dedent(JAD.format(**params))
+
+        except Exception, e:
+            log.error("OTAP: {0} wanted {1} but {2}".format(imei, deliver, str(e)))
+            return bottle.HTTPResponse(status=404, body="ENOENT")
+
+        log.debug('OTAP: about to deliver {0} to {1}'.format(deliver, imei))
+
+
+    return bottle.HTTPResponse(status=404, body="NOTFORYOU")
+
+# --- OTAP (download JAR)
+# This is invoked by the device when it wants to retrieve the JAR
+# file. We just send out the static file.
+
+@bottle.route('/otap/jars/<filename:re:.*\.jar>')
+def jarfile(filename):
+    return static_file(filename, root='jars')
+
 
 @bottle.route('/jarupload', method='POST')
 def jarupload():
@@ -464,11 +532,6 @@ def jarupload():
     return "Thanks for the JAR: I got {0}. Stored as {1}".format(midlet_version, path)
     # return json.dumps(resp, sort_keys=True, indent=2)
 
-@bottle.route('/dn')
-def FIXME():
-    f = open('/tmp/ot/0.8.9/OwnTracks.jar')
-
-    return f
 
 #  ---------------------------------------------------------------
 
