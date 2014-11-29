@@ -202,7 +202,7 @@ if __name__ == '__main__':
             'User-Agent'    : 'SIMU/{0}'.format(imei),
         }
 
-        url = '%s/otap/%s/version' % (otc_url, custid)
+        url = '%s/%s/version' % (otc_url, custid)
 
         payload = current_version
         resp = requests.post(url, headers=headers, data=payload)
@@ -220,7 +220,7 @@ if __name__ == '__main__':
             'User-Agent'    : 'SIMU/{0}'.format(imei),
         }
 
-        url = '%s/otap/%s/otap.jad' % (otc_url, custid)
+        url = '%s/%s/otap.jad' % (otc_url, custid)
 
         resp = requests.get(url, headers=headers)
         if resp.status_code != 200:
