@@ -267,12 +267,15 @@ class Methods(object):
         return results
 
     def config(self, otckey):
+
+        url = request.url   # http://localhost/rpc
+        url = url.replace('/rpc', '')
+
         res = ''
         if _keycheck(otckey) == True:
-            res = res + "set otapURI=http://otap.example.com/CUST/otap.jad\n"
-            res = res + "set notifyURI=http://otap.example.com/CUST/otap/id=@\n"
-            res = res + "set versionURI=http://otap.example.com/CUST/version\n"
-            res = res + request.url
+            res = res + "set otapURI=%s/CUST/otap.jad\n" % url
+            res = res + "set notifyURI=%s/CUST/otap/id=@\n" % url
+            res = res + "set versionURI=%s/CUST/version\n" % url
 
         return res
 

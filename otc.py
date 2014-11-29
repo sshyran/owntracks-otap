@@ -155,6 +155,9 @@ if __name__ == '__main__':
     if args['purge']:
         print rpc.purge(args['<version>'])
 
+    if args['config']:
+        print rpc.config()
+
     if args['block'] or args['unblock']:
         imei = args['<imei>']
         if args['--all']:
