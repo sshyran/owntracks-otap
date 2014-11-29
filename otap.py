@@ -71,7 +71,7 @@ def list_jars():
 
 @bottle.route('/')
 def index():
-    return "(click)"
+    return "(OTAP)"
 
 
 #   ____  ____   ____ 
@@ -310,7 +310,7 @@ def agentinfo():
 # For legacy reasons, I support /custid/version and /custid/version.php (the `word'
 # parameter is ignored)
 
-@bottle.route('/otap/<custid>/<word:re:(version|version.php)>', method='POST')
+@bottle.route('/<custid>/<word:re:(version|version.php)>', method='POST')
 def versioncheck(custid, word):
 
     device, imei = agentinfo()
@@ -406,7 +406,7 @@ def get_midlet_version(f):
 # notifyURI=http://localhost/otap/id=@
 
 # POST /otap/id=PM
-@bottle.route('/otap/id=<tid>', method="POST")
+@bottle.route('/id=<tid>', method="POST")
 def otap(tid):
     print "POST for ", tid
     return "thanks for post"
@@ -418,7 +418,7 @@ def otap(tid):
 # set otapURI=http://localhost/otap/otap.jad
 #
 # GET /otap.jad
-@bottle.route('/otap/<custid>/otap.jad', method="GET")
+@bottle.route('/<custid>/otap.jad', method="GET")
 def otap_get(custid):
     device, imei = agentinfo()
 
@@ -486,7 +486,7 @@ def otap_get(custid):
 # This is invoked by the device when it wants to retrieve the JAR
 # file. We just send out the static file.
 
-@bottle.route('/otap/jars/<filename:re:.*\.jar>')
+@bottle.route('/jars/<filename:re:.*\.jar>')
 def jarfile(filename):
     return static_file(filename, root='jars')
 
