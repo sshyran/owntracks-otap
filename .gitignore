@@ -8,3 +8,5 @@
 *.pickle
 obsolete/
 *.conf
+prod.sh
+dev.sh
