@@ -266,6 +266,16 @@ class Methods(object):
 
         return results
 
+    def config(self, otckey):
+        res = ''
+        if _keycheck(otckey) == True:
+            res = res + "set otapURI=http://otap.example.com/CUST/otap.jad\n"
+            res = res + "set notifyURI=http://otap.example.com/CUST/otap/id=@\n"
+            res = res + "set versionURI=http://otap.example.com/CUST/version\n"
+            res = res + request.url
+
+        return res
+
 
 bottle_jsonrpc.register('/rpc', Methods())
 

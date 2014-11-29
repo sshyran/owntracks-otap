@@ -80,6 +80,9 @@ class RPC(object):
     def unblock(self, imei, bl=0):
         return self._request('block', imei, bl)
 
+    def config(self):
+        return self._request('config')
+
 def print_devices(data):
     print "BLOCK IMEI             CUSTID    TID  Reported   Deliver"
     for item in data:
@@ -101,6 +104,7 @@ if __name__ == '__main__':
       otc purge <version>
       otc versioncheck <imei> <custid> <version>
       otc otap <imei> <custid>
+      otc config
 
       otc (-h | --help)
       otc --version
