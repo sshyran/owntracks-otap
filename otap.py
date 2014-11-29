@@ -266,7 +266,7 @@ class Methods(object):
 
         return results
 
-    def config(self, otckey):
+    def showconfig(self, otckey):
 
         url = request.url   # http://localhost/rpc
         url = url.replace('/rpc', '')
