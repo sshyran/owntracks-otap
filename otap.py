@@ -415,7 +415,7 @@ def otap(tid):
 # This is invoked by the device when it wants to initiate OTAP. The
 # URI *must* end in ".jad" or the device will not handle OTAP
 #
-# set otapURI=http://localhost/otap/otap.jad
+# set otapURI=http://localhost/cust/otap.jad
 #
 # GET /otap.jad
 @bottle.route('/<custid>/otap.jad', method="GET")
@@ -471,6 +471,7 @@ def otap_get(custid):
                MicroEdition-Profile: IMP-NG
             """
 
+            log.debug("OTAP: returning JAD descriptor")
             return textwrap.dedent(JAD.format(**params))
 
         except Exception, e:
