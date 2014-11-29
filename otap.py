@@ -13,7 +13,7 @@ from bottle import response, template, static_file, request
 import zipfile
 import owntracks
 from owntracks import cf
-from owntracks.dbschema import db, Otap, Versioncheck, createalltables, dbconn
+from owntracks.dbschema import db, Otap, Versioncheck, createalltables, dbconn, fn
 import time
 import hashlib
 from distutils.version import StrictVersion
@@ -168,6 +168,38 @@ class Methods(object):
             return "Can't find IMEI {0} in DB".format(imei)
 
         return "{0} will get {1} at next OTAP".format(imei, version)
+
+    def purge(self, otckey, version):
+        ''' purge JAR version from filesystem '''
+
+        if _keycheck(otckey) == False:
+            return "NOP"
+
+        version = version.replace(' ', '')
+
+        n = None
+        try:
+            query = (Otap.select(fn.COUNT(Otap.imei).alias('numdeliver')).where(Otap.deliver == version).get())
+            n = query.numdeliver or 0
+        except Exception, e:
+            raise
+
+        if n != 0:
+            return "Cannot purge this version: {0} clients are expecting it".format(n)
+
+        jarfile = "{0}/{1}.jar".format(cf.jardir, version)
+        if not os.path.isfile(jarfile):
+            return "No such version here"
+
+        try:
+            os.remove(jarfile)
+        except Exception, e:
+            s = "Error removing {0}: {1}".format(jarfile, str(e))
+            log.error(s)
+            return s
+
+        return "{0} removed".format(jarfile)
+
 
     def block(self, otckey, imei, bl):
         ''' Set block in db for IMEI. If IMEI == 'ALL', then for all '''

@@ -50,6 +50,7 @@ class RPC(object):
             return self.server.call(cmd, b64, *args)
         except Exception, e:
             print("Error talking to server: {0}".format(str(e)))
+            return None
 
     def ping(self):
         return self._request('ping')
@@ -68,6 +69,9 @@ class RPC(object):
 
     def deliver(self, imei, version):
         return self._request('deliver', imei, version)
+
+    def purge(self, version):
+        return self._request('purge', version)
 
     def block(self, imei, bl=0):
         return self._request('block', imei, bl)
@@ -93,6 +97,7 @@ if __name__ == '__main__':
       otc block [--all] [<imei>]
       otc unblock [--all] [<imei>]
       otc upload <filename>
+      otc purge <version>
 
       otc (-h | --help)
       otc --version
@@ -123,10 +128,12 @@ if __name__ == '__main__':
 
     if args['show']:
         data = rpc.show(args['<imei>'])
-        print_devices(data)
+        if data is not None:
+            print_devices(data)
     if args['find']:
         data = rpc.find(args['<tid>'])
-        print_devices(data)
+        if data is not None:
+            print_devices(data)
 
     if args['jars']:
         jarlist = rpc.jars()
@@ -137,6 +144,9 @@ if __name__ == '__main__':
 
     if args['deliver']:
         print rpc.deliver(args['<imei>'], args['<version>'])
+
+    if args['purge']:
+        print rpc.purge(args['<version>'])
 
     if args['block'] or args['unblock']:
         imei = args['<imei>']
