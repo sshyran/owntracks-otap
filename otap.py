@@ -318,19 +318,10 @@ def versioncheck(custid, word):
 
 
     current_version = bottle.request.body.read()
-    item = {
-        'imei'    : imei,
-        'version' : current_version,
-        'tstamp'  : time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(int(time.time()))),
-    }
-    try:
-        vlog = Versioncheck(**item)
-        vlog.save()
-    except Exception, e:
-        log.error("Cannot INSERT versioncheck log for {0} into DB: {1}".format(imei, str(e)))
 
     upgrade = 0
     settings = []
+    new_version = ""
 
     try:
         o = Otap.get(Otap.imei == imei)
@@ -340,8 +331,9 @@ def versioncheck(custid, word):
         o.reported = current_version
         o.save()
 
-        if o.block == 0:
+        if o.block == 0 and o.deliver is not None and current_version != o.deliver:
             upgrade = 1
+            new_version = o.deliver
 
             try:
                 for kv in o.settings.split(';'):
@@ -358,10 +350,22 @@ def versioncheck(custid, word):
     except Exception, e:
         log.error("Cannot get OTAP record for {0} from DB: {1}".format(imei, str(e)))
 
+    item = {
+        'imei'    : imei,
+        'version' : current_version,
+        'tstamp'  : time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(int(time.time()))),
+        'upgrade' : upgrade,
+    }
+    try:
+        vlog = Versioncheck(**item)
+        vlog.save()
+    except Exception, e:
+        log.error("Cannot INSERT versioncheck log for {0} into DB: {1}".format(imei, str(e)))
 
     resp = {
-        'upgrade'   : upgrade,
-        'settings'  : settings,
+        'upgrade'     : upgrade,
+        'new_version' : new_version,
+        'settings'    : settings,
         }
 
     return resp

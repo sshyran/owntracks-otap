@@ -41,6 +41,7 @@ class Versioncheck(OTAPModel):
     imei            = CharField(null=False, max_length=15)
     version         = CharField(null=True, max_length=10)
     tstamp          = DateTimeField(default=datetime.datetime.now, index=True)
+    upgrade         = IntegerField(null=True)
 
 class Otap(OTAPModel):
     imei            = CharField(null=False, max_length=15, unique=True)

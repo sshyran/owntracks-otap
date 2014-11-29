@@ -13,6 +13,7 @@ from docopt import docopt
 import warnings
 from requests_toolbelt import MultipartEncoder
 import requests
+import json
 
 with warnings.catch_warnings():
     ''' Suppress cffi/vengine_cpy.py:166: UserWarning: reimporting '_cffi__x332a1fa9xefb54d7c' might overwrite older definitions '''
@@ -98,6 +99,8 @@ if __name__ == '__main__':
       otc unblock [--all] [<imei>]
       otc upload <filename>
       otc purge <version>
+      otc versioncheck <imei> <custid> <version>
+      otc otap <imei>
 
       otc (-h | --help)
       otc --version
@@ -187,5 +190,23 @@ if __name__ == '__main__':
         r = requests.post(url, data=m, headers={'Content-Type' : m.content_type})
         print r.text
         f.close()
+
+    if args['versioncheck']:
+        imei = args['<imei>']
+        custid = args['<custid>']
+        current_version = args['<version>']
+
+        print "Simulating Versioncheck for IMEI {0} ({1})...".format(imei, current_version)
+
+        headers = {
+            'User-Agent'    : 'SIMU/{0}'.format(imei),
+        }
+
+        url = '%s/otap/%s/version' % (otc_url, custid)
+
+        payload = current_version
+        resp = requests.post(url, headers=headers, data=payload)
+
+        print json.dumps(resp.json(), indent=4)
 
 
