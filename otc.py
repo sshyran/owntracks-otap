@@ -104,7 +104,7 @@ if __name__ == '__main__':
       otc purge <version>
       otc versioncheck <imei> <custid> <version>
       otc otap <imei> <custid>
-      otc showconfig
+      otc showconfig <custid>
 
       otc (-h | --help)
       otc --version
