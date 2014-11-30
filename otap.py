@@ -547,6 +547,7 @@ def otap_get(custid):
         log.debug('OTAP: about to deliver {0} to {1}'.format(deliver, imei))
 
 
+    log.info('OTAP request for cust={0} / {1} IMEI={2} denied: NOTFORYOU'.format(custid, device, imei))
     return bottle.HTTPResponse(status=404, body="NOTFORYOU")
 
 # --- OTAP (download JAR)
