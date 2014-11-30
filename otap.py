@@ -472,7 +472,7 @@ def otap_notify(custid, clientid):
         pass
 
     message = "Upgrade result for {custid}/{tid} ({device}) {imei}: {result}  {tstamp}".format(**item)
-    notify(tid, message)
+    notify(item.get('tid', 'xxx'), message)
 
     return ""
 
