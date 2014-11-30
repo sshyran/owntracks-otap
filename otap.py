@@ -522,7 +522,7 @@ def otap_get(custid):
 
             params = {
                 'octets'    : octets,
-                'jarURL'    : "%s/%s.jar" % (cf.jarurl, deliver),
+                'jarURL'    : "%s/%s/OwnTracks.jar" % (cf.jarurl, deliver),
                 'deliver'   : deliver,
             }
 
@@ -561,10 +561,22 @@ def otap_get(custid):
 #
 # "GET /jars/0.10.65.jar HTTP/1.1" 200 241748 "-" "TC65i/123456789012345 Profile/IMP-NG Configuration/CLDC-1.1"
 
-@bottle.route('/jars/<filename:re:.*\.jar>')
-def jarfile(filename):
-    response.headers['Content-Disposition'] = 'attachment; filename="OwnTracks.jar"'
-    return static_file(filename, root='jars', download='OwnTracks.jar')
+@bottle.route('/jars/<version:re:.*>/OwnTracks.jar', method='GET')
+def jarfile(version):
+
+    path = "{0}/{1}.jar".format(cf.jardir, version)
+
+    try:
+        f = open(path, 'rb')
+        return f
+    except Exception, e:
+        log.error("Can't serve JAR {0}: {1}".format(version, str(e)))
+        return bottle.HTTPResponse(status=404, body="ENOENT")
+
+#@bottle.route('/jars/<filename:re:.*\.jar>')
+#def jarfile(filename):
+#    response.headers['Content-Disposition'] = 'attachment; filename="OwnTracks.jar"'
+#    return static_file(filename, root='jars', download='OwnTracks.jar')
 
 
 @bottle.route('/jarupload', method='POST')
