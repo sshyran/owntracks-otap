@@ -160,7 +160,9 @@ class Methods(object):
         except Exception, e:
             log.error("Cannot get OTAP record for {0} from DB: {1}".format(imei, str(e)))
 
-        return "IMEI {0} added".format(imei)
+        message = "IMEI {0} ({1}) added".format(imei, tid)
+        notify('add_imei', message)
+        return message
 
     def deliver(self, otckey, imei, version):
         ''' Update IMEI in database and set version to be delivered '''
