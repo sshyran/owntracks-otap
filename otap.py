@@ -71,6 +71,7 @@ def list_jars():
     return versions
 
 def notify(top, message):
+    ''' Publish an MQTT notification to cf.notify + top '''
 
     if cf.notify is None:
         return
@@ -99,17 +100,6 @@ def index():
 #                     
 
 class Methods(object):
-
-# FIXME: we need the following commands:
-# blockall (true/false)      block all from otap
-# show versions
-# add IMEI TID version
-# del IMEI
-# set IMEI deliverversion
-# set all deliverversion
-# add IMEI cust TID
-
-
 
     def ping(self, otckey):
         auth = _keycheck(otckey)
@@ -165,7 +155,10 @@ class Methods(object):
         return message
 
     def deliver(self, otckey, imei, version):
-        ''' Update IMEI in database and set version to be delivered '''
+        ''' Update IMEI in database and set version to be delivered.
+            n.nn.nn means that version, "latest" means current highest version,
+            and "*" means highest version existing even if that is introduced
+            at a later point in time. '''
 
         if _keycheck(otckey) == False:
             return "NOP"
@@ -192,7 +185,8 @@ class Methods(object):
         return "{0} will get {1} at next OTAP".format(imei, version)
 
     def purge(self, otckey, version):
-        ''' purge JAR version from filesystem '''
+        ''' purge JAR version from filesystem, ensuring that version is
+            not configured as 'deliver' for devices. '''
 
         if _keycheck(otckey) == False:
             return "NOP"
@@ -243,6 +237,7 @@ class Methods(object):
         return "%s updates" % nrecs
 
     def show(self, otckey, imei):
+        ''' Show content of database. If IMEI specified, then just that one. '''
 
         if _keycheck(otckey) == False:
             return "NOP"
@@ -266,6 +261,7 @@ class Methods(object):
         return results
 
     def find(self, otckey, tid):
+        ''' Find a TID in the database and show info. '''
 
         results = []
         if _keycheck(otckey) == True:
@@ -286,6 +282,7 @@ class Methods(object):
         return results
 
     def showconfig(self, otckey, custid):
+        ''' Print configuration for the Greenwich OwnTracks Edition '''
 
         url = request.url   # http://localhost/rpc
 
@@ -418,12 +415,10 @@ def get_midlet_version(f):
         from which we obtain the MIDlet-Version and return that. '''
 
     version = None
-
-    f.seek(0)
-
     try:
         manifest = 'META-INF/MANIFEST.MF'
 
+        f.seek(0)
         zf = zipfile.ZipFile(f, 'r')
         # info = zf.getinfo(manifest)
         # print info.filename, info.file_size
@@ -453,8 +448,6 @@ def otap_notify(custid, clientid):
     device, imei = agentinfo()
     otap_result = bottle.request.body.read()
     otap_result = otap_result.rstrip()
-
-# FIXME: notify=XXXXX can be TID or IMEI (at the moment)
 
     log.info('OTAP notifyURI for cust={0} / {1} IMEI={2}'.format(custid, device, imei))
 
@@ -542,8 +535,6 @@ def otap_get(custid):
 
             log.debug("OTAP: returning JAD descriptor")
 
-
-
             message = "Upgrade starting on {custid}/{tid} ({device}) {imei} {deliver}".format(tid=tid, device=device, imei=imei, deliver=deliver, custid=custid)
             notify('OTAupgrades', message)
             return textwrap.dedent(JAD.format(**params))
@@ -559,7 +550,8 @@ def otap_get(custid):
 
 # --- OTAP (download JAR)
 # This is invoked by the device when it wants to retrieve the JAR
-# file. We just send out the static file.
+# file. We just send out the static file. I could use Bottle's static_file
+# but I want the filename to be 'OwnTracks.jar' so return a file object.
 #
 # "GET /jars/0.10.65.jar HTTP/1.1" 200 241748 "-" "TC65i/123456789012345 Profile/IMP-NG Configuration/CLDC-1.1"
 
@@ -581,11 +573,6 @@ def jarfile(version):
         log.error("Can't serve JAR {0}: {1}".format(version, str(e)))
         return bottle.HTTPResponse(status=404, body="ENOENT")
 
-#@bottle.route('/jars/<filename:re:.*\.jar>')
-#def jarfile(filename):
-#    response.headers['Content-Disposition'] = 'attachment; filename="OwnTracks.jar"'
-#    return static_file(filename, root='jars', download='OwnTracks.jar')
-
 
 @bottle.route('/jarupload', method='POST')
 def jarupload():
@@ -599,11 +586,11 @@ def jarupload():
     if _keycheck(otckey) is False:
         return bottle.HTTPResponse(status=403, body="BAD KEY")
 
-    print "filename = ", upload.filename
-    print "c-type   = ", upload.content_type
-    print "c-len    = ", upload.content_length
-    print "name     = ", name
-    print "ext      = ", ext
+    #print "filename = ", upload.filename
+    #print "c-type   = ", upload.content_type
+    #print "c-len    = ", upload.content_length
+    #print "name     = ", name
+    #print "ext      = ", ext
 
     midlet_version = None
     try:
