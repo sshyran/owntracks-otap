@@ -20,6 +20,7 @@ from distutils.version import StrictVersion
 import warnings
 import base64
 import textwrap
+import paho.mqtt.publish as mqtt
 
 log = logging.getLogger(__name__)
 
@@ -68,6 +69,21 @@ def list_jars():
 
     versions.sort(key=StrictVersion)
     return versions
+
+def notify(top, message):
+
+    if cf.notify is None:
+        return
+
+    topic = cf.notify + "/" + top
+    payload = message
+
+    try:
+        mqtt.single(topic, payload)
+    except Exception, e:
+        log.error("Cannot MQTT publish: {0}".format(str(e)))
+        pass
+
 
 @bottle.route('/')
 def index():
@@ -342,6 +358,7 @@ def versioncheck(custid, word):
     upgrade = 0
     settings = []
     new_version = ""
+    tid = ""
 
     try:
         o = Otap.get(Otap.imei == imei)
@@ -355,14 +372,14 @@ def versioncheck(custid, word):
             upgrade = 1
             new_version = o.deliver
 
-            try:
-                for kv in o.settings.split(';'):
-                    print "KV===", kv
-                    k, v = kv.split('=')
-                    settings.append(dict(key=k, val=v))
-            except:
-                raise
-                pass
+            if o.settings is not None:
+                try:
+                    for kv in o.settings.split(';'):
+                        print "KV===", kv
+                        k, v = kv.split('=')
+                        settings.append(dict(key=k, val=v))
+                except:
+                    pass
 
 
     except Otap.DoesNotExist:
@@ -375,6 +392,8 @@ def versioncheck(custid, word):
         'version' : current_version,
         'tstamp'  : time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(int(time.time()))),
         'upgrade' : upgrade,
+        'tid'     : tid,
+        'new_version' : new_version,
     }
     try:
         vlog = Versioncheck(**item)
@@ -387,6 +406,9 @@ def versioncheck(custid, word):
         'new_version' : new_version,
         'settings'    : settings,
         }
+
+    message = "{imei} ({tid}) has {version}; IHAVE {new_version}. upgrade={upgrade} {tstamp}".format(**item)
+    notify('version', message)
 
     return resp
 
