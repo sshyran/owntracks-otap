@@ -106,7 +106,7 @@ if __name__ == '__main__':
       otc deliver <imei> <version>
       otc block [--all] [<imei>]
       otc unblock [--all] [<imei>]
-      otc upload <filename>
+      otc upload <filename> [--force]
       otc purge <version>
       otc versioncheck <imei> <custid> <version>
       otc otap <imei> <custid>
@@ -185,6 +185,9 @@ if __name__ == '__main__':
         # "traditionally".
 
         filepath = args['<filename>']
+        force = '0'
+        if args['--force']:
+            force = '1'
 
         try:
             f = open(filepath, 'rb')
@@ -198,7 +201,8 @@ if __name__ == '__main__':
         m = MultipartEncoder(
             fields = {
                 'otckey' : b64,
-                'jar'   : ('file', f, 'application/binary')
+                'jar'   : ('file', f, 'application/binary'),
+                'force' : force,
             }
         )
 

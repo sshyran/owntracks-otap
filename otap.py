@@ -587,8 +587,13 @@ def jarfile(version):
 def jarupload():
 
     otckey  = request.forms.get('otckey')
+    force   = request.forms.get('force')
     upload  = request.files.get('jar')
     name, ext = os.path.splitext(upload.filename)
+
+    overwrite=False
+    if force == '1':
+        overwrite = True
 
     if otckey is None:
         return bottle.HTTPResponse(status=403, body="NO KEY")
@@ -617,10 +622,12 @@ def jarupload():
 
     path = "{0}/{1}.jar".format(cf.jardir, midlet_version)
     try:
-        upload.save(path, overwrite=True)
+        upload.save(path, overwrite=overwrite)
         log.info("Saved uploaded JAR as {0}".format(path))
     except Exception, e:
-        log.error("Cannot save {0}: {1}".format(path, str(e)))
+        s = "Cannot save {0}: {1}".format(path, str(e))
+        log.error(s)
+        return s
 
 
     message = "JAR version {0} stored as {1}".format(midlet_version, path)
