@@ -570,9 +570,9 @@ def jarfile(version):
         statinfo = os.stat(jarfile)
         octets = statinfo.st_size
 
-        response.content_type = 'application/octet-stream'
-        response.headers['Content-Disposition'] = 'attachment; filename="OwnTracks.jar"'
+        response.content_type = 'application/java-archive'
         response.headers['Content-Length'] = str(octets)
+        log.info("Delivering {0}".format(jarfile))
         f = open(jarfile, 'rb')
         return f
     except Exception, e:
