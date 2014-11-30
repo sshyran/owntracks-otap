@@ -313,6 +313,8 @@ def agentinfo():
 
     user_agent = request.environ.get('HTTP_USER_AGENT')
     try:
+        # "TC65i/123456789012345 Profile/IMP-NG Configuration/CLDC-1.1"
+        user_agent = user_agent.split(' ')[0]
         parts = user_agent.split('/')
         if len(parts) == 2:
             device = parts[0]
@@ -477,8 +479,8 @@ def otap_notify(custid, tid):
 # URI *must* end in ".jad" or the device will not handle OTAP
 #
 # set otapURI=http://localhost/cust/otap.jad
+# "GET /dev/otap.jad HTTP/1.1" 200 8 "-" "TC65i/356612028111492 Profile/IMP-NG Configuration/CLDC-1.1"
 #
-# GET /otap.jad
 @bottle.route('/<custid>/otap.jad', method="GET")
 def otap_get(custid):
     device, imei = agentinfo()
