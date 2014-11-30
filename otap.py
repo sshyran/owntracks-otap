@@ -564,10 +564,16 @@ def otap_get(custid):
 @bottle.route('/jars/<version:re:.*>/OwnTracks.jar', method='GET')
 def jarfile(version):
 
-    path = "{0}/{1}.jar".format(cf.jardir, version)
+    jarfile = "{0}/{1}.jar".format(cf.jardir, version)
 
     try:
-        f = open(path, 'rb')
+        statinfo = os.stat(jarfile)
+        octets = statinfo.st_size
+
+        response.content_type = 'application/octet-stream'
+        response.headers['Content-Disposition'] = 'attachment; filename="OwnTracks.jar"'
+        response.headers['Content-Length'] = str(octets)
+        f = open(jarfile, 'rb')
         return f
     except Exception, e:
         log.error("Can't serve JAR {0}: {1}".format(version, str(e)))
