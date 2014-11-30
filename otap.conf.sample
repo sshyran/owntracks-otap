@@ -38,5 +38,7 @@ jardir = '/tmp/jars'
 otckey = "jkKaYZoNv2xFy0RDTUOxZ3WYTtzA0br96/6EYEwUW7c="
 
 # If notify is not None, it is the MQTT topic to which notifies are published
+# Setting notify to `events/otap` will cause events to be published like this:
+# events/otap/version 123456789012345 (J4) has 0.8.78; IHAVE 0.10.65. upgrade=1 2014-11-30 10:28:19
 
 notify = None
