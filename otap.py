@@ -79,7 +79,8 @@ def notify(top, message):
     payload = message
 
     try:
-        mqtt.single(topic, payload)
+        mqtt.single(topic, payload, qos=1, retain=False, hostname='localhost',
+            port=1883)
     except Exception, e:
         log.error("Cannot MQTT publish: {0}".format(str(e)))
         pass
@@ -445,10 +446,32 @@ def get_midlet_version(f):
 # notifyURI=http://localhost/otap/id=@
 
 # POST /otap/id=PM
-@bottle.route('/id=<tid>', method="POST")
-def otap(tid):
-    print "POST for ", tid
-    return "thanks for post"
+@bottle.route('/<custid>/id=<tid>', method="POST")
+def otap_notify(custid, tid):
+    device, imei = agentinfo()
+    otap_result = bottle.request.body.read()
+    otap_result = otap_result.rstrip()
+
+    log.info('OTAP notifyURI for cust={0} / {1} IMEI={2}'.format(custid, device, imei))
+
+    item = {
+        'tid'       : "",
+        'device'    : device,
+        'imei'      : imei,
+        'result'    : otap_result,
+        'tstamp'    : time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(int(time.time()))),
+    }
+    try:
+        o = Otap.get(Otap.imei == imei, Otap.custid == custid)
+
+        item['tid'] = o.tid or "??"
+    except:
+        pass
+
+    message = "Upgrade result for {tid} ({device}) {imei}: {result}  {tstamp}".format(**item)
+    notify(tid, message)
+
+    return ""
 
 # --- OTAP (download JAD)
 # This is invoked by the device when it wants to initiate OTAP. The
