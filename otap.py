@@ -563,7 +563,8 @@ def otap_get(custid):
 
 @bottle.route('/jars/<filename:re:.*\.jar>')
 def jarfile(filename):
-    return static_file(filename, root='jars')
+    response.headers['Content-Disposition'] = 'attachment; filename="OwnTracks.jar"'
+    return static_file(filename, root='jars', download='OwnTracks.jar')
 
 
 @bottle.route('/jarupload', method='POST')
