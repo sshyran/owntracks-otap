@@ -28,15 +28,18 @@ version = '0.12'
 secret_text = b"OvEr.THe.aIR*"
 
 def make_secret(message):
-    key = base64.b64decode(os.getenv("OTC_KEY"))
-    box = nacl.secret.SecretBox(key)
-    nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
-    encrypted = box.encrypt(message, nonce)
+    try:
+        key = base64.b64decode(os.getenv("OTC_KEY"))
+        box = nacl.secret.SecretBox(key)
+        nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
+        encrypted = box.encrypt(message, nonce)
 
-    b64 = base64.b64encode(encrypted)
-    return b64
+        b64 = base64.b64encode(encrypted)
+        return b64
+    except Exception, e:
+        print "Can't make secret from OTC_KEY: ", str(e)
+        sys.exit(1)
 
-# FIXME: catch errors with bad key
 
 class RPC(object):
     def __init__(self, otc_url, otc_secret):
