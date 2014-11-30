@@ -362,13 +362,13 @@ def versioncheck(custid, word):
         o = Otap.get(Otap.imei == imei)
 
         tid = o.tid or '??'
+        new_version = o.deliver
 
         o.reported = current_version
         o.save()
 
         if o.block == 0 and o.deliver is not None and current_version != o.deliver:
             upgrade = 1
-            new_version = o.deliver
 
             if o.settings is not None:
                 try:
