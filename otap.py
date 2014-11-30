@@ -419,6 +419,8 @@ def get_midlet_version(f):
 
     version = None
 
+    f.seek(0)
+
     try:
         manifest = 'META-INF/MANIFEST.MF'
 
@@ -611,6 +613,8 @@ def jarupload():
 
     if midlet_version is None:
         return bottle.HTTPResponse(status=415, body="NO MIDLET VERSION")
+
+    upload.file.seek(0)
 
     if not os.path.exists(cf.jardir):
         os.makedirs(cf.jardir)
