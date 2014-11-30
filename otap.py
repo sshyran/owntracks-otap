@@ -445,12 +445,14 @@ def get_midlet_version(f):
 #
 # notifyURI=http://localhost/otap/id=@
 
-# POST /otap/id=PM
-@bottle.route('/<custid>/notify=<tid>', method="POST")
-def otap_notify(custid, tid):
+# "POST /dev/notify=123456789012345 HTTP/1.1" 200 0 "-" "TC65i/356612028111492 Profile/IMP-NG Configuration/CLDC-1.1"
+@bottle.route('/<custid>/notify=<clientid>', method="POST")
+def otap_notify(custid, clientid):
     device, imei = agentinfo()
     otap_result = bottle.request.body.read()
     otap_result = otap_result.rstrip()
+
+# FIXME: notify=XXXXX can be TID or IMEI (at the moment)
 
     log.info('OTAP notifyURI for cust={0} / {1} IMEI={2}'.format(custid, device, imei))
 
@@ -556,6 +558,8 @@ def otap_get(custid):
 # --- OTAP (download JAR)
 # This is invoked by the device when it wants to retrieve the JAR
 # file. We just send out the static file.
+#
+# "GET /jars/0.10.65.jar HTTP/1.1" 200 241748 "-" "TC65i/123456789012345 Profile/IMP-NG Configuration/CLDC-1.1"
 
 @bottle.route('/jars/<filename:re:.*\.jar>')
 def jarfile(filename):
