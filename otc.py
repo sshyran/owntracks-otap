@@ -36,6 +36,8 @@ def make_secret(message):
     b64 = base64.b64encode(encrypted)
     return b64
 
+# FIXME: catch errors with bad key
+
 class RPC(object):
     def __init__(self, otc_url, otc_secret):
         self.server = pyjsonrpc.HttpClient(

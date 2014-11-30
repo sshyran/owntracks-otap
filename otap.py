@@ -183,7 +183,7 @@ class Methods(object):
         except:
             return "Can't find IMEI {0} in DB".format(imei)
 
-        message "{0} will get {1} at next OTAP".format(imei, version)
+        message = "{0} will get {1} at next OTAP".format(imei, version)
         notify('deliver', message)
         return message
 
