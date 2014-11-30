@@ -599,7 +599,9 @@ def jarupload():
         log.error("Cannot save {0}: {1}".format(path, str(e)))
 
 
-    return "Thanks for the JAR: I got {0}. Stored as {1}".format(midlet_version, path)
+    message = "JAR version {0} stored as {1}".format(midlet_version, path)
+    notify('jarupload', message)
+    return message
     # return json.dumps(resp, sort_keys=True, indent=2)
 
 
