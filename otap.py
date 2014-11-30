@@ -248,7 +248,7 @@ class Methods(object):
         query = (Otap.select())
         if imei is not None:
             query = query.where(Otap.imei == imei)
-        query = query.order_by(Otap.imei.asc())
+        query = query.order_by(Otap.tid.asc())
         for q in query.naive():
             results.append({
                 'imei'      : q.imei,
