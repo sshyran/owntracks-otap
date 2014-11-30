@@ -297,7 +297,7 @@ class Methods(object):
         res = ''
         if _keycheck(otckey) == True:
             res = res + "set otapURI={url}/{custid}/otap.jad\n".format(**params)
-            res = res + "set notifyURI={url}/{custid}/otap/id=@\n".format(**params)
+            res = res + "set notifyURI={url}/{custid}/notify=@\n".format(**params)
             res = res + "set versionURI={url}/{custid}/version\n".format(**params)
 
         return res
@@ -448,7 +448,7 @@ def get_midlet_version(f):
 # notifyURI=http://localhost/otap/id=@
 
 # POST /otap/id=PM
-@bottle.route('/<custid>/id=<tid>', method="POST")
+@bottle.route('/<custid>/notify=<tid>', method="POST")
 def otap_notify(custid, tid):
     device, imei = agentinfo()
     otap_result = bottle.request.body.read()
