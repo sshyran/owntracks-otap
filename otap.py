@@ -351,11 +351,6 @@ def versioncheck(custid, word):
 
     device, imei = agentinfo()
 
-    print "CUSTID = ", custid
-
-    print "device, imei: ", device, imei
-
-
     current_version = bottle.request.body.read()
 
     upgrade = 0
@@ -397,6 +392,7 @@ def versioncheck(custid, word):
         'upgrade' : upgrade,
         'tid'     : tid,
         'new_version' : new_version,
+        'custid'      : custid,
     }
     try:
         vlog = Versioncheck(**item)
@@ -410,7 +406,7 @@ def versioncheck(custid, word):
         'settings'    : settings,
         }
 
-    message = "{imei} ({tid}) has {version}; IHAVE {new_version}. upgrade={upgrade} {tstamp}".format(**item)
+    message = "{imei} ({custid}/{tid}) has {version}; IHAVE {new_version}. upgrade={upgrade} {tstamp}".format(**item)
     notify('version', message)
 
     return resp
@@ -462,6 +458,7 @@ def otap_notify(custid, tid):
         'imei'      : imei,
         'result'    : otap_result,
         'tstamp'    : time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(int(time.time()))),
+        'custid'    : custid,
     }
     try:
         o = Otap.get(Otap.imei == imei, Otap.custid == custid)
@@ -470,7 +467,7 @@ def otap_notify(custid, tid):
     except:
         pass
 
-    message = "Upgrade result for {tid} ({device}) {imei}: {result}  {tstamp}".format(**item)
+    message = "Upgrade result for {custid}/{tid} ({device}) {imei}: {result}  {tstamp}".format(**item)
     notify(tid, message)
 
     return ""
@@ -541,7 +538,7 @@ def otap_get(custid):
 
 
 
-            message = "Upgrade starting on {tid} ({device}) {imei} {deliver}".format(tid=tid, device=device, imei=imei, deliver=deliver)
+            message = "Upgrade starting on {custid}/{tid} ({device}) {imei} {deliver}".format(tid=tid, device=device, imei=imei, deliver=deliver, custid=custid)
             notify('OTAupgrades', message)
             return textwrap.dedent(JAD.format(**params))
 
