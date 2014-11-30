@@ -30,6 +30,7 @@ class Config(RawConfigParser):
         self.jarurl     = 'http://localhost:8810/jars'
         self.jardir     = '/tmp/jars'
         self.otckey     = None
+        self.notify     = None
 
         RawConfigParser.__init__(self)
         try:

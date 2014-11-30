@@ -36,3 +36,7 @@ jardir = '/tmp/jars'
 # otc's environment.
 
 otckey = "jkKaYZoNv2xFy0RDTUOxZ3WYTtzA0br96/6EYEwUW7c="
+
+# If notify is not None, it is the MQTT topic to which notifies are published
+
+notify = None

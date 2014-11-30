@@ -2,7 +2,7 @@ MySQL-python
 peewee
 bottle
 
-### paho-mqtt
+paho-mqtt
 
 # https://github.com/gerold-penz/python-jsonrpc
 python-jsonrpc
