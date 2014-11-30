@@ -463,9 +463,12 @@ def otap_get(custid):
 
     log.info('OTAP request for cust={0} / {1} IMEI={2}'.format(custid, device, imei))
 
+    tid = ""
     deliver = None
     try:
         o = Otap.get(Otap.imei == imei, Otap.custid == custid)
+
+        tid = o.tid or "??"
 
         if o.block == 0 and o.deliver is not None:
             deliver = o.deliver
@@ -510,6 +513,11 @@ def otap_get(custid):
             """
 
             log.debug("OTAP: returning JAD descriptor")
+
+
+
+            message = "Upgrade starting on {tid} ({device}) {imei} {deliver}".format(tid=tid, device=device, imei=imei, deliver=deliver)
+            notify('OTAupgrades', message)
             return textwrap.dedent(JAD.format(**params))
 
         except Exception, e:
