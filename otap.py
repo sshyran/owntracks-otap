@@ -151,7 +151,7 @@ class Methods(object):
         except Exception, e:
             log.error("Cannot get OTAP record for {0} from DB: {1}".format(imei, str(e)))
 
-        message = "IMEI {0} ({1}) added".format(imei, tid)
+        message = "IMEI {0} ({1}/{2}) added".format(imei, custid, tid)
         notify('add_imei', message)
         return message
 
@@ -183,7 +183,9 @@ class Methods(object):
         except:
             return "Can't find IMEI {0} in DB".format(imei)
 
-        return "{0} will get {1} at next OTAP".format(imei, version)
+        message "{0} will get {1} at next OTAP".format(imei, version)
+        notify('deliver', message)
+        return message
 
     def purge(self, otckey, version):
         ''' purge JAR version from filesystem, ensuring that version is
@@ -215,7 +217,9 @@ class Methods(object):
             log.error(s)
             return s
 
-        return "{0} removed".format(jarfile)
+        message = "{0} removed".format(jarfile)
+        notify('purge', message)
+        return message
 
 
     def block(self, otckey, imei, bl):
@@ -235,7 +239,10 @@ class Methods(object):
             s = "Cannot update db: {0}".format(str(e))
             log.error(s)
             return s
-        return "%s updates" % nrecs
+
+        message = "%s updates set to block=%s" % (nrecs, bl)
+        notify('blocker', message)
+        return message
 
     def show(self, otckey, imei):
         ''' Show content of database. If IMEI specified, then just that one. '''
