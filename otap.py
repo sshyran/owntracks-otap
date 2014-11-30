@@ -627,7 +627,7 @@ def jarupload():
     except Exception, e:
         s = "Cannot save {0}: {1}".format(path, str(e))
         log.error(s)
-        notify('jarupload', message)
+        notify('jarupload', s)
         return s
 
 
