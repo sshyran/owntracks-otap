@@ -89,6 +89,9 @@ class RPC(object):
     def showconfig(self, custid):
         return self._request('showconfig', custid)
 
+    def versionlog(self, count):
+        return self._request('versionlog', count)
+
 def print_devices(data):
     print "BLOCK IMEI             CUSTID    TID  Reported   Deliver"
     for item in data:
@@ -111,6 +114,7 @@ if __name__ == '__main__':
       otc versioncheck <imei> <custid> <version>
       otc otap <imei> <custid>
       otc showconfig <custid>
+      otc versionlog [<count>]
 
       otc (-h | --help)
       otc --version
@@ -179,6 +183,16 @@ if __name__ == '__main__':
         if args['block']:
             bl = 1
         print rpc.block(imei, bl)
+
+    if args['versionlog']:
+        count = 40
+
+        if args['<count>']:
+            count = int(args['<count>'])
+
+        logs = rpc.versionlog(count)
+        for l in logs:
+            print "%(imei)-17s %(version)-10s %(tstamp)-20s upgrade=%(upgrade)s" % l
 
     if args['upload']:
         # No uploads with RPC (content too large), so we have to do this

@@ -22,6 +22,7 @@ import warnings
 import base64
 import textwrap
 import paho.mqtt.publish as mqtt
+import pytz
 
 log = logging.getLogger(__name__)
 
@@ -87,6 +88,18 @@ def notify(top, message):
         log.error("Cannot MQTT publish: {0}".format(str(e)))
         pass
 
+def utc_to_localtime(dt, tzname='UTC'):
+    ''' Convert datetime 'dt' which is in UTC to the timezone specified as 'tzname' '''
+
+    utc = pytz.utc
+    local_zone = pytz.timezone(tzname)
+
+    utc_time = utc.localize(dt)
+    local_time = utc_time.astimezone(local_zone)
+
+    new_s = local_time.strftime("%Y-%m-%d %H:%M:%S")
+    # log.debug("utc_time: TZ={0}: {1} => {2}".format(tzname, dt, new_s))
+    return new_s
 
 @bottle.route('/')
 def index():
@@ -306,6 +319,25 @@ class Methods(object):
             res = res + "set versionURI={url}/{custid}/version\n".format(**params)
 
         return res
+
+    def versionlog(self, otckey, count):
+        ''' Return an array of versionlog entries '''
+
+        logs = []
+        if _keycheck(otckey) == True:
+
+            query = (Versioncheck.select().limit(count))
+            query = query.order_by(Versioncheck.tstamp.desc())
+            for q in query.naive():
+                logs.append({
+                    'imei'      : q.imei,
+                    'version'   : q.version,
+                    'tstamp'    : utc_to_localtime(q.tstamp),
+                    'upgrade'   : q.upgrade,
+                    })
+
+        return logs
+
 
 
 bottle_jsonrpc.register('/rpc', Methods())
