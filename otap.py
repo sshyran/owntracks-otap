@@ -214,6 +214,9 @@ class Methods(object):
         imei = imei.replace(' ', '')
         version = version.replace(' ', '')
 
+        if version == 'ANY':
+            version = '*'
+
         if version == 'latest':
             # Get sorted versions and take highest
             version = list_jars()[-1]
