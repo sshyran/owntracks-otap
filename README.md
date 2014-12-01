@@ -16,6 +16,7 @@ following commands are supported:
 * `ping`. If "PONG" is returned, all is good. If you see "pong", then the secret key isn't correctly configured between `otap.py` and `otc.py`.
 
 * `show` [_imei_]
+* `imei`. Displays the IMEI number for _tid_. Specify an optional _custid_ if needed.
 * `deliver` _imei_ _version_ where _version_ may be any installed JAR version number, the word "`*`" which means any most recent version ("`ANY` is synonym for `*`), or "`latest`" which is the current latest version (i.e. the higest version currently displayed by the `jars` command).
 * `find`. Search for a TID in the database.
 * `jars`. Show installed JAR versions

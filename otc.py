@@ -68,6 +68,9 @@ class RPC(object):
     def find(self, tid=None):
         return self._request('find', tid)
 
+    def imei(self, custid=None, tid=None):
+        return self._request('imei', custid, tid)
+
     def jars(self):
         return self._request('jars')
 
@@ -119,6 +122,7 @@ if __name__ == '__main__':
       otc ping
       otc show [<imei>]
       otc find <tid>
+      otc imei <tid> [<custid>]
       otc jars
       otc add <imei> <custid> <tid>
       otc deliver <imei> <version>
@@ -171,6 +175,9 @@ if __name__ == '__main__':
         data = rpc.find(args['<tid>'])
         if data is not None:
             print_devices(data)
+
+    if args['imei']:
+        print rpc.imei(args['<custid>'], args['<tid>'])
 
     if args['jars']:
         jarlist = rpc.jars()

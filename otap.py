@@ -372,6 +372,26 @@ class Methods(object):
 
         return results
 
+
+    def imei(self, otckey, custid, tid):
+        ''' Find a TID (and optional custid) in the database and return it's IMEI. '''
+
+        result = ""
+        dbconn()
+
+        if _keycheck(otckey) == True:
+
+            try:
+                query = Otap.select(Otap.imei).where(Otap.tid == tid)
+                if custid is not None:
+                    query = query.where(Otap.custid == custid)
+                query = query.get()
+                result = query.imei
+            except Otap.DoesNotExist:
+                pass
+
+        return result
+
     def showconfig(self, otckey, custid):
         ''' Print configuration for the Greenwich OwnTracks Edition '''
 
