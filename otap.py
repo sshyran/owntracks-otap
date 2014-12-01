@@ -302,6 +302,7 @@ class Methods(object):
 
         results = []
 
+# This join works in dev but not in prod; same Peewee versions (!?!)
 #        query = (Otap
 ##            .select(Otap, Settings.sname.alias('sname'))
 #            .select(Otap, Settings.sname)
@@ -337,16 +338,12 @@ class Methods(object):
         results = []
         if _keycheck(otckey) == True:
 
-            # Lousy, but no other way at the moment ...
+            # Lousy, but no other way at the moment ... See comment re JOIN above
             snames = {}
             query = Imeiset.select()
             for q in query.naive():
                 snames[q.imei] = q.sname
 
-#            query = (Otap
-#                .select(Otap, Settings.sname.alias('sname'))
-#                .join(Imeiset, JOIN_LEFT_OUTER, on=(Otap.imei == Imeiset.imei))
-#                )
             query = Otap.select()
             query = query.where(Otap.tid == tid)
             query = query.order_by(Otap.imei.asc())
