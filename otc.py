@@ -102,9 +102,12 @@ class RPC(object):
         return self._request('s_undef', name)
 
 def print_devices(data):
-    print "BLOCK IMEI             CUSTID    TID  Reported   Deliver"
+    print "BLOCK IMEI             CUSTID    TID  Reported   Deliver    Settings"
     for item in data:
-        print "%(block)5d %(imei)-16s %(custid)-10s %(tid)-3s %(reported)-10s %(deliver)-10s" % item
+        if item['sname'] is None:
+            item['sname'] = '-'
+
+        print "%(block)5d %(imei)-16s %(custid)-10s %(tid)-3s %(reported)-10s %(deliver)-10s %(sname)s" % item
 
 if __name__ == '__main__':
     usage = '''OTAP Control

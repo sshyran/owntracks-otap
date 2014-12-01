@@ -299,7 +299,10 @@ class Methods(object):
 
         results = []
 
-        query = (Otap.select())
+        query = (Otap
+            .select(Otap, Settings.sname.alias('sname'))
+            .join(Imeiset, JOIN_LEFT_OUTER, on=(Otap.imei == Imeiset.imei))
+            )
         if imei is not None:
             query = query.where(Otap.imei == imei)
         query = query.order_by(Otap.tid.asc())
@@ -311,6 +314,7 @@ class Methods(object):
                 'block'     : q.block,
                 'reported'  : q.reported,
                 'deliver'   : q.deliver,
+                'sname'     : q.sname,
                 })
 
         return results
@@ -321,7 +325,10 @@ class Methods(object):
         results = []
         if _keycheck(otckey) == True:
 
-            query = (Otap.select())
+            query = (Otap
+                .select(Otap, Settings.sname.alias('sname'))
+                .join(Imeiset, JOIN_LEFT_OUTER, on=(Otap.imei == Imeiset.imei))
+                )
             query = query.where(Otap.tid == tid)
             query = query.order_by(Otap.imei.asc())
             for q in query.naive():
@@ -332,6 +339,7 @@ class Methods(object):
                     'block'     : q.block,
                     'reported'  : q.reported,
                     'deliver'   : q.deliver,
+                    'sname'     : q.sname,
                     })
 
         return results
