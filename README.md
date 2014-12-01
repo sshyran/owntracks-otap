@@ -35,6 +35,7 @@ following commands are supported:
 * `undef`. Remove the set
 * `set`. Define parameter set _name_ to be assigned to _imei_ permantently. The optional --once will provide it once only at next versioncheck
 * `unset`. Remove assigned parameter _name_ from _imei_.
+* `showsettings`. Print a list of setting sets. If _imei_ is specified show those only.
 
 
 ### uWSGI

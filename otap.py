@@ -14,7 +14,7 @@ from bottle import response, template, static_file, request
 import zipfile
 import owntracks
 from owntracks import cf
-from owntracks.dbschema import db, Otap, Versioncheck, Settings, Imeiset, createalltables, dbconn, fn
+from owntracks.dbschema import db, Otap, Versioncheck, Settings, Imeiset, createalltables, dbconn, fn, JOIN_LEFT_OUTER
 import time
 import hashlib
 from distutils.version import StrictVersion
@@ -100,6 +100,17 @@ def utc_to_localtime(dt, tzname='UTC'):
     new_s = local_time.strftime("%Y-%m-%d %H:%M:%S")
     # log.debug("utc_time: TZ={0}: {1} => {2}".format(tzname, dt, new_s))
     return new_s
+
+def expand_settings(settings):
+    slist = []
+    try:
+        for kv in settings.split(';'):
+            k, v = kv.split('=')
+            slist.append(dict(key=k, val=v))
+    except:
+        pass
+
+    return slist
 
 @bottle.route('/')
 def index():
@@ -337,6 +348,40 @@ class Methods(object):
                     })
 
         return logs
+
+    def showsets(self, otckey, imei=None):
+        ''' Return an array of settings entries. If IMEI then print those '''
+
+        result = []
+        if _keycheck(otckey) == True:
+
+            if imei is None:
+                query = (Settings.select())
+                query = query.order_by(Settings.sname.asc())
+                for q in query.naive():
+                    result.append({
+                        'sname'     : q.sname,
+                        'settings'  : q.settings,
+                        })
+            else:
+                try:
+                    query = (Settings
+                        .select(Settings)
+                        .join(Imeiset, JOIN_LEFT_OUTER, on=(Settings.sname == Imeiset.sname))
+                        .where(
+                            (Imeiset.imei == imei)
+                        )
+                    ).get()
+
+                    result = expand_settings(query.settings)
+                except Settings.DoesNotExist:
+                    pass
+                except Exception, e:
+                    message = "Error gettings settings for IMEI {0}: {1}".format(imei, str(e))
+                    log.error(message)
+                    return []
+
+        return result
 
     def s_define(self, otckey, sname, settings):
         ''' Create a settings entry '''

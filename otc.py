@@ -92,6 +92,9 @@ class RPC(object):
     def versionlog(self, count):
         return self._request('versionlog', count)
 
+    def showsets(self, imei=None):
+        return self._request('showsets', imei)
+
     def s_define(self, name, settings):
         return self._request('s_define', name, settings)
 
@@ -123,6 +126,7 @@ if __name__ == '__main__':
       otc versionlog [<count>]
       otc define <name> <settings>
       otc undef <name>
+      otc showsets [<imei>]
 
       otc (-h | --help)
       otc --version
@@ -201,6 +205,15 @@ if __name__ == '__main__':
         logs = rpc.versionlog(count)
         for l in logs:
             print "%(imei)-17s %(version)-10s %(tstamp)-20s upgrade=%(upgrade)s" % l
+
+    if args['showsets']:
+        res = rpc.showsets(args['<imei>'])
+
+        if args['<imei>']:
+            print json.dumps(res, indent=4)
+        else:
+            for r in res:
+                print "%(sname)-27s %(settings)s" % r
 
     if args['define']:
         print rpc.s_define(args['<name>'], args['<settings>'])
