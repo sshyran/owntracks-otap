@@ -16,13 +16,10 @@ following commands are supported:
 * `ping`. If "PONG" is returned, all is good. If you see "pong", then the secret key isn't correctly configured between `otap.py` and `otc.py`.
 
 * `show` [_imei_]
-
-* `deliver` _imei_ _version_ where _version_ may be any installed JAR version number, the word "`*`" which means any most recent version, or "`latest`" which is the current latest version.
-
+* `deliver` _imei_ _version_ where _version_ may be any installed JAR version number, the word "`*`" which means any most recent version ("`ANY` is synonym for `*`), or "`latest`" which is the current latest version (i.e. the higest version currently displayed by the `jars` command).
 * `find`. Search for a TID in the database.
 * `jars`. Show installed JAR versions
 * `add`. Add a device with _custid_ and _tid_ to the database.
-* `deliver`. Set up _imei_ to be provided with Jar _version_ at next OTAP
 * `block`. Prohibit _imei_ to do OTAP.
 * `unblock`. Enable _imei_ to do OTAP.
 * `upload`. Upload a Jar file to the OTAP server. The specified filename must be a JAR file.
