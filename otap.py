@@ -814,6 +814,7 @@ def otap_get(custid):
             log.debug("OTAP: returning JAD descriptor")
 
             message = "Upgrade starting on {custid}/{tid} ({device}) {imei} {deliver}".format(tid=tid, device=device, imei=imei, deliver=deliver, custid=custid)
+            log.info(message)
             notify('OTAupgrades', message)
             return textwrap.dedent(JAD.format(**params))
 
