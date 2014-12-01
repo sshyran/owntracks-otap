@@ -457,7 +457,6 @@ def otap_notify(custid, clientid):
     otap_result = bottle.request.body.read()
     otap_result = otap_result.rstrip()
 
-    log.info('OTAP notifyURI for cust={0} / {1} IMEI={2}'.format(custid, device, imei))
 
     item = {
         'tid'       : "",
@@ -474,7 +473,8 @@ def otap_notify(custid, clientid):
     except:
         pass
 
-    message = "Upgrade result for {custid}/{tid} ({device}) {imei}: {result}  {tstamp}".format(**item)
+    message = "OTAP upgrade result for {custid}/{tid} ({device}) {imei}: {result}  {tstamp}".format(**item)
+    log.info(message)
     notify(item.get('tid', 'xxx'), message)
 
     return ""
