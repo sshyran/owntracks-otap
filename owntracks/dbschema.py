@@ -48,11 +48,11 @@ class Versioncheck(OTAPModel):
     upgrade         = IntegerField(null=True)
 
 class Settings(OTAPModel):
-    sname           = CharField(null=False, max_length=25)
+    sname           = CharField(null=False, max_length=25, unique=True)
     settings        = TextField(null=True)
 
 class Imeiset(OTAPModel):
-    imei            = CharField(null=False, max_length=15)
+    imei            = CharField(null=False, max_length=15, unique=True)
     sname           = CharField(null=False, max_length=25)
     once            = IntegerField(null=False, default=0)
 
@@ -63,7 +63,6 @@ class Otap(OTAPModel):
     reported        = CharField(null=True, max_length=10)
     deliver         = CharField(null=True, max_length=10)
     block           = IntegerField(null=False)
-    settings        = TextField(null=True)  # FIXME: drop
 
     class Meta:
         indexes = (

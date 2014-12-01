@@ -471,6 +471,59 @@ class Methods(object):
         notify('s_undef', message)
         return message
 
+    def s_set(self, otckey, imei, sname, bf):
+        ''' Set/unset settings SNAME on IMEI '''
+
+        if _keycheck(otckey) == False:
+            return "NOP"
+
+        imei = imei.replace(' ', '')
+        sname = sname.replace(' ', '')
+
+        if bf == 0:
+            # Unset
+            query = Imeiset.delete().where(Imeiset.imei == imei , Imeiset.sname == sname)
+            nrows = query.execute()
+
+            message = "{0} row deleted from IMEIset for {1}/{2}".format(nrows, imei, sname)
+            log.info(message)
+            notify('unset', message)
+            return message
+
+        # Assign (set), but only if the specified settings name exists
+
+        message = ""
+        try:
+            query = (Settings.select().where(Settings.sname == sname)).get()
+
+            item = {
+                'imei'   : imei,
+                'sname'  : sname,
+            }
+            try:
+                i = Imeiset(**item)
+                i.save()
+
+                message = "Setting {0} configured for {1}".format(sname, imei)
+            except Exception, e:
+                message = "Cannot add Imeiset for {0}/{1}: {2}".format(imei, sname, str(e))
+                log.error(message)
+                return message
+
+        except Settings.DoesNotExist:
+            message = "Cannot assign setting {0}: it does not exist".format(sname)
+            log.info(message)
+            return message
+        except Exception, e:
+            message = "Error querying Settings {0}: {1}".format(sname, str(e))
+            log.error(message)
+            return message
+
+        log.info(message)
+        notify('set', message)
+        return message
+
+
 bottle_jsonrpc.register('/rpc', Methods())
 
 

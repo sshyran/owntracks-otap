@@ -101,6 +101,9 @@ class RPC(object):
     def s_undef(self, name):
         return self._request('s_undef', name)
 
+    def s_set(self, imei, name, bf):
+        return self._request('s_set', imei, name, bf)
+
 def print_devices(data):
     print "BLOCK IMEI             CUSTID    TID  Reported   Deliver    Settings"
     for item in data:
@@ -130,6 +133,8 @@ if __name__ == '__main__':
       otc define <name> <settings>
       otc undef <name>
       otc showsets [<imei>]
+      otc set <imei> <name>
+      otc unset <imei> <name>
 
       otc (-h | --help)
       otc --version
@@ -198,6 +203,13 @@ if __name__ == '__main__':
         if args['block']:
             bl = 1
         print rpc.block(imei, bl)
+
+    if args['set'] or args['unset']:
+        bf = 1
+        if args['unset']:
+            bf = 0
+
+        print rpc.s_set(args['<imei>'], args['<name>'], bf)
 
     if args['versionlog']:
         count = 40
