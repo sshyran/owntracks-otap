@@ -170,6 +170,8 @@ class Methods(object):
         if _keycheck(otckey) == False:
             return "NOP"
 
+        dbconn()
+
         imei = imei.replace(' ', '')
         custid = custid.replace(' ', '')
         tid  = tid.replace(' ', '')
@@ -211,6 +213,8 @@ class Methods(object):
         if _keycheck(otckey) == False:
             return "NOP"
 
+        dbconn()
+
         imei = imei.replace(' ', '')
         version = version.replace(' ', '')
 
@@ -243,6 +247,8 @@ class Methods(object):
 
         if _keycheck(otckey) == False:
             return "NOP"
+
+        dbconn()
 
         version = version.replace(' ', '')
 
@@ -278,6 +284,8 @@ class Methods(object):
         if _keycheck(otckey) == False:
             return "NOP"
 
+        dbconn()
+
         imei = imei.replace(' ', '')
         nrecs = None
         try:
@@ -299,6 +307,8 @@ class Methods(object):
 
         if _keycheck(otckey) == False:
             return "NOP"
+
+        dbconn()
 
         results = []
 
@@ -336,6 +346,8 @@ class Methods(object):
         ''' Find a TID in the database and show info. '''
 
         results = []
+        dbconn()
+
         if _keycheck(otckey) == True:
 
             # Lousy, but no other way at the moment ... See comment re JOIN above
@@ -381,6 +393,8 @@ class Methods(object):
     def versionlog(self, otckey, count):
         ''' Return an array of versionlog entries '''
 
+        dbconn()
+
         logs = []
         if _keycheck(otckey) == True:
 
@@ -398,6 +412,8 @@ class Methods(object):
 
     def showsets(self, otckey, imei=None):
         ''' Return an array of settings entries. If IMEI then print those '''
+
+        dbconn()
 
         result = []
         if _keycheck(otckey) == True:
@@ -421,6 +437,8 @@ class Methods(object):
 
         if _keycheck(otckey) == False:
             return None
+
+        dbconn()
 
         sname = sname.replace(' ', '')
         message = "OK"
@@ -457,6 +475,8 @@ class Methods(object):
     def s_undef(self, otckey, sname):
         ''' Destroy a settings entry '''
 
+        dbconn()
+
         if _keycheck(otckey) == False:
             return None
 
@@ -492,6 +512,8 @@ class Methods(object):
 
         if _keycheck(otckey) == False:
             return "NOP"
+
+        dbconn()
 
         imei = imei.replace(' ', '')
         sname = sname.replace(' ', '')
@@ -593,6 +615,8 @@ def versioncheck(custid, word):
 
     current_version = bottle.request.body.read()
 
+    dbconn()
+
     upgrade = 0
     settings = []
     new_version = ""
@@ -603,11 +627,13 @@ def versioncheck(custid, word):
 
         tid = o.tid or '??'
         new_version = o.deliver
+        if new_version == '*':
+            new_version = list_jars()[-1]
 
         o.reported = current_version
         o.save()
 
-        if o.block == 0 and o.deliver is not None and current_version != o.deliver:
+        if o.block == 0 and o.deliver is not None and current_version != new_version:
             upgrade = 1
 
             settings_str = imei_settings(imei)
@@ -731,6 +757,8 @@ def otap_notify(custid, clientid):
 @bottle.route('/<custid>/otap.jad', method="GET")
 def otap_get(custid):
     device, imei = agentinfo()
+
+    dbconn()
 
     log.info('OTAP request for cust={0} / {1} IMEI={2}'.format(custid, device, imei))
 
