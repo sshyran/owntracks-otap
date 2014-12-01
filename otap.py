@@ -112,6 +112,29 @@ def expand_settings(settings):
 
     return slist
 
+def imei_settings(imei):
+    ''' Get a list of settings for this specific IMEI '''
+
+    settings = None
+    try:
+        query = (Settings
+            .select(Settings)
+            .join(Imeiset, JOIN_LEFT_OUTER, on=(Settings.sname == Imeiset.sname))
+            .where(
+                (Imeiset.imei == imei)
+            )
+        ).get()
+
+        settings = query.settings
+    except Settings.DoesNotExist:
+        pass
+    except Exception, e:
+        message = "Error gettings settings for IMEI {0}: {1}".format(imei, str(e))
+        log.error(message)
+
+    return settings
+
+
 @bottle.route('/')
 def index():
     return "(OTAP)"
@@ -364,22 +387,8 @@ class Methods(object):
                         'settings'  : q.settings,
                         })
             else:
-                try:
-                    query = (Settings
-                        .select(Settings)
-                        .join(Imeiset, JOIN_LEFT_OUTER, on=(Settings.sname == Imeiset.sname))
-                        .where(
-                            (Imeiset.imei == imei)
-                        )
-                    ).get()
-
-                    result = expand_settings(query.settings)
-                except Settings.DoesNotExist:
-                    pass
-                except Exception, e:
-                    message = "Error gettings settings for IMEI {0}: {1}".format(imei, str(e))
-                    log.error(message)
-                    return []
+                settings = imei_settings(imei)
+                result = expand_settings(settings)
 
         return result
 
@@ -523,15 +532,9 @@ def versioncheck(custid, word):
         if o.block == 0 and o.deliver is not None and current_version != o.deliver:
             upgrade = 1
 
-            if o.settings is not None:
-                try:
-                    for kv in o.settings.split(';'):
-                        print "KV===", kv
-                        k, v = kv.split('=')
-                        settings.append(dict(key=k, val=v))
-                except:
-                    pass
-
+            settings_str = imei_settings(imei)
+            if settings_str is not None:
+                settings = expand_settings(settings_str)
 
     except Otap.DoesNotExist:
         log.info("Requested OTAP IMEI {0} doesn't exist in database".format(imei))
