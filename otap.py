@@ -490,7 +490,7 @@ class Methods(object):
         notify('s_undef', message)
         return message
 
-    def s_set(self, otckey, imei, sname, bf):
+    def s_set(self, otckey, imei, sname, bf, once):
         ''' Set/unset settings SNAME on IMEI '''
 
         if _keycheck(otckey) == False:
@@ -518,12 +518,13 @@ class Methods(object):
             item = {
                 'imei'   : imei,
                 'sname'  : sname,
+                'once'   : once,
             }
             try:
                 i = Imeiset(**item)
                 i.save()
 
-                message = "Setting {0} configured for {1}".format(sname, imei)
+                message = "Setting {0} configured for {1}. Once={2}".format(sname, imei, once)
             except Exception, e:
                 message = "Cannot add Imeiset for {0}/{1}: {2}".format(imei, sname, str(e))
                 log.error(message)
@@ -615,6 +616,21 @@ def versioncheck(custid, word):
             settings_str = imei_settings(imei)
             if settings_str is not None:
                 settings = expand_settings(settings_str)
+
+            if device == 'SIMU':
+                log.info("NOT clearing settings-delivery because SIMUlator")
+            else:
+                # Check if settings are once-only. If so, delete the record
+                try:
+                    q = Imeiset.select().where(Imeiset.imei == imei).get()
+                    if q.once == 1:
+                        query = Imeiset.delete().where(Imeiset.imei == imei)
+                        nrows = query.execute()
+                        message = "Imeiset deleted for {0} because once-only configured".format(imei)
+                        log.info(message)
+                        notify('versioncheck', message)
+                except:
+                    pass
 
     except Otap.DoesNotExist:
         log.info("Requested OTAP IMEI {0} doesn't exist in database".format(imei))
