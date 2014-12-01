@@ -14,7 +14,7 @@ from bottle import response, template, static_file, request
 import zipfile
 import owntracks
 from owntracks import cf
-from owntracks.dbschema import db, Otap, Versioncheck, createalltables, dbconn, fn
+from owntracks.dbschema import db, Otap, Versioncheck, Settings, Imeiset, createalltables, dbconn, fn
 import time
 import hashlib
 from distutils.version import StrictVersion
@@ -338,7 +338,76 @@ class Methods(object):
 
         return logs
 
+    def s_define(self, otckey, sname, settings):
+        ''' Create a settings entry '''
 
+        if _keycheck(otckey) == False:
+            return None
+
+        sname = sname.replace(' ', '')
+        message = "OK"
+
+        try:
+            s = Settings.get(Settings.sname == sname)
+
+            s.settings  = settings
+            s.save()
+            message = "Updated settings {0} in database".format(sname)
+            log.info(message)
+        except Settings.DoesNotExist:
+            item = {
+                'sname'    : sname,
+                'settings' : settings,
+            }
+            try:
+                s = Settings(**item)
+                s.save()
+
+                message = "Stored Settings {0} in database".format(sname)
+                log.info(message)
+            except Exception, e:
+                message = "Cannot store Settings record for {0} in DB: {1}".format(sname, str(e))
+                log.error(message)
+        except Exception, e:
+            message = "Cannot get Settings record for {0} from DB: {1}".format(sname, str(e))
+            log.error(message)
+
+        
+        notify('s_define', message)
+        return message
+
+    def s_undef(self, otckey, sname):
+        ''' Destroy a settings entry '''
+
+        if _keycheck(otckey) == False:
+            return None
+
+        sname = sname.replace(' ', '')
+        message = "OK"
+
+        # Ensure we don't clobber a settings if it is still assigned to an IMEI
+        n = 0
+        try:
+            query = (Imeiset.select(fn.COUNT(Imeiset.imei).alias('numdeliver')).where(Imeiset.sname == sname).get())
+            n = query.numdeliver or 0
+        except Exception, e:
+            raise
+
+        if n == 0:
+            try:
+                query = Settings.delete().where(Settings.sname == sname)
+                nrows = query.execute()
+                message = "Delete {0} from settings: {1} row deleted".format(sname, nrows)
+                log.info(message)
+            except Exception, e:
+                message = "Cannot DELETE Settings record for {0} from DB: {1}".format(sname, str(e))
+                log.error(message)
+        else:
+            message = "Will not delete settings {0} because it is assigned to {1} devices".format(sname, n)
+            log.info(message)
+
+        notify('s_undef', message)
+        return message
 
 bottle_jsonrpc.register('/rpc', Methods())
 

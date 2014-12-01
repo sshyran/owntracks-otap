@@ -92,6 +92,12 @@ class RPC(object):
     def versionlog(self, count):
         return self._request('versionlog', count)
 
+    def s_define(self, name, settings):
+        return self._request('s_define', name, settings)
+
+    def s_undef(self, name):
+        return self._request('s_undef', name)
+
 def print_devices(data):
     print "BLOCK IMEI             CUSTID    TID  Reported   Deliver"
     for item in data:
@@ -115,6 +121,8 @@ if __name__ == '__main__':
       otc otap <imei> <custid>
       otc showconfig <custid>
       otc versionlog [<count>]
+      otc define <name> <settings>
+      otc undef <name>
 
       otc (-h | --help)
       otc --version
@@ -193,6 +201,12 @@ if __name__ == '__main__':
         logs = rpc.versionlog(count)
         for l in logs:
             print "%(imei)-17s %(version)-10s %(tstamp)-20s upgrade=%(upgrade)s" % l
+
+    if args['define']:
+        print rpc.s_define(args['<name>'], args['<settings>'])
+
+    if args['undef']:
+        print rpc.s_undef(args['<name>'])
 
     if args['upload']:
         # No uploads with RPC (content too large), so we have to do this

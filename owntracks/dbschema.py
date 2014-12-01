@@ -47,6 +47,15 @@ class Versioncheck(OTAPModel):
     tstamp          = DateTimeField(default=datetime.datetime.now, index=True)
     upgrade         = IntegerField(null=True)
 
+class Settings(OTAPModel):
+    sname           = CharField(null=False, max_length=25)
+    settings        = TextField(null=True)
+
+class Imeiset(OTAPModel):
+    imei            = CharField(null=False, max_length=15)
+    sname           = CharField(null=False, max_length=25)
+    once            = IntegerField(null=False, default=0)
+
 class Otap(OTAPModel):
     imei            = CharField(null=False, max_length=15, unique=True)
     custid          = CharField(null=False, max_length=20)
@@ -54,7 +63,7 @@ class Otap(OTAPModel):
     reported        = CharField(null=True, max_length=10)
     deliver         = CharField(null=True, max_length=10)
     block           = IntegerField(null=False)
-    settings        = TextField(null=True)
+    settings        = TextField(null=True)  # FIXME: drop
 
     class Meta:
         indexes = (
@@ -70,6 +79,8 @@ def createalltables():
 
     Otap.create_table(fail_silently=silent)
     Versioncheck.create_table(fail_silently=silent)
+    Settings.create_table(fail_silently=silent)
+    Imeiset.create_table(fail_silently=silent)
 
 def dbconn():
     # Attempt to connect if not already connected. For MySQL, take care of MySQL 2006

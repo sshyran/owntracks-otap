@@ -30,6 +30,12 @@ following commands are supported:
 * `versioncheck`. Simulate a versionCheck
 * `otap`: Simulate an OTAP request (the `.jad` is returned)
 * `showconfig`. Show the OTAP configuration required for OwnTracks Greenwich
+* `versionlog`. Show _count_ records from the versioncheck log
+* `define`. Define a named parameter-set with semicolon-separated settings
+* `undef`. Remove the set
+* `set`. Define parameter set _name_ to be assigned to _imei_ permantently. The optional --once will provide it once only at next versioncheck
+* `unset`. Remove assigned parameter _name_ from _imei_.
+
 
 ### uWSGI
 
