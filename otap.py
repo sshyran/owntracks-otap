@@ -299,8 +299,8 @@ class Methods(object):
 
         results = []
 
-#            .select(Otap, Settings.sname.alias('sname'))
         query = (Otap
+#            .select(Otap, Settings.sname.alias('sname'))
             .select(Otap, Settings.sname)
             .join(Imeiset, JOIN_LEFT_OUTER, on=(Otap.imei == Imeiset.imei))
             )
