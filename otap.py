@@ -602,7 +602,7 @@ def versioncheck(custid, word):
     tid = ""
 
     try:
-        o = Otap.get(Otap.imei == imei)
+        o = Otap.get(Otap.imei == imei, Otap.custid == custid)
 
         tid = o.tid or '??'
         new_version = o.deliver
@@ -633,7 +633,7 @@ def versioncheck(custid, word):
                     pass
 
     except Otap.DoesNotExist:
-        log.info("Requested OTAP IMEI {0} doesn't exist in database".format(imei))
+        log.info("Requested OTAP IMEI {0}/{1} doesn't exist in database".format(custid, imei))
     except Exception, e:
         log.error("Cannot get OTAP record for {0} from DB: {1}".format(imei, str(e)))
 
