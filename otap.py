@@ -91,6 +91,9 @@ def notify(top, message):
 def utc_to_localtime(dt, tzname='UTC'):
     ''' Convert datetime 'dt' which is in UTC to the timezone specified as 'tzname' '''
 
+    if dt is None:
+        return ""
+
     utc = pytz.utc
     local_zone = pytz.timezone(tzname)
 
@@ -338,6 +341,7 @@ class Methods(object):
                 'reported'  : q.reported,
                 'deliver'   : q.deliver,
                 'sname'     : snames.get(q.imei, ""),
+                'lastcheck' : utc_to_localtime(q.lastcheck),
                 })
 
         return results
@@ -368,6 +372,7 @@ class Methods(object):
                     'reported'  : q.reported,
                     'deliver'   : q.deliver,
                     'sname'     : snames.get(q.imei, ""),
+                    'lastcheck' : utc_to_localtime(q.lastcheck),
                     })
 
         return results
@@ -652,6 +657,7 @@ def versioncheck(custid, word):
 
         o.reported = current_version
         if device != 'SIMU':
+            o.lastcheck = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(int(time.time())))
             o.save()
 
         if o.block == 0 and o.deliver is not None and current_version != new_version:
