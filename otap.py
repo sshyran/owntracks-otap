@@ -663,6 +663,9 @@ def versioncheck(custid, word):
         if o.block == 0 and o.deliver is not None and current_version != new_version:
             upgrade = 1
 
+        if o.block == 0:
+            # Device is not being blocked, but it may have settings we want to push. Do it
+
             settings_str = imei_settings(imei)
             if settings_str is not None:
                 settings = expand_settings(settings_str)
