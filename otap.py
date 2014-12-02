@@ -362,7 +362,7 @@ class Methods(object):
 
             query = Otap.select()
             query = query.where((Otap.tid == word) | (Otap.custid == word))
-            query = query.order_by(Otap.imei.asc())
+            query = query.order_by(Otap.tid.asc())
             for q in query.naive():
                 results.append({
                     'imei'      : q.imei,
