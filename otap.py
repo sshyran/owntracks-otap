@@ -766,6 +766,10 @@ def otap_notify(custid, clientid):
         o = Otap.get(Otap.imei == imei, Otap.custid == custid)
 
         item['tid'] = o.tid or "??"
+
+        if device != 'SIMU':
+            o.lastcheck = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(int(time.time())))
+            o.save()
     except:
         pass
 

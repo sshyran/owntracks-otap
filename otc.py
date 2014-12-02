@@ -108,7 +108,7 @@ class RPC(object):
         return self._request('s_set', imei, name, bf, once)
 
 def print_devices(data):
-    print "BLOCK IMEI             CUSTID    TID  Reported   Deliver    Settings    Lastcheck"
+    print "BLOCK IMEI             CUSTID    TID  Reported   Deliver    Settings    Last chk/notif"
     for item in data:
         if item['sname'] is None:
             item['sname'] = '-'
