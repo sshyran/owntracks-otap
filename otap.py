@@ -651,7 +651,8 @@ def versioncheck(custid, word):
             new_version = list_jars()[-1]
 
         o.reported = current_version
-        o.save()
+        if device != 'SIMU':
+            o.save()
 
         if o.block == 0 and o.deliver is not None and current_version != new_version:
             upgrade = 1
@@ -690,8 +691,9 @@ def versioncheck(custid, word):
         'custid'      : custid,
     }
     try:
-        vlog = Versioncheck(**item)
-        vlog.save()
+        if device != 'SIMU':
+            vlog = Versioncheck(**item)
+            vlog.save()
     except Exception, e:
         log.error("Cannot INSERT versioncheck log for {0} into DB: {1}".format(imei, str(e)))
 
