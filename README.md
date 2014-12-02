@@ -18,7 +18,7 @@ following commands are supported:
 * `show` [_imei_]
 * `imei`. Displays the IMEI number for _tid_. Specify an optional _custid_ if needed.
 * `deliver` _imei_ _version_ where _version_ may be any installed JAR version number, the word "`*`" which means any most recent version ("`ANY` is synonym for `*`), or "`latest`" which is the current latest version (i.e. the higest version currently displayed by the `jars` command).
-* `find`. Search for a TID in the database.
+* `find`. Search for _word_ in either _custid_ or _tid_ in the otap database table.
 * `jars`. Show installed JAR versions
 * `add`. Add a device with _custid_ and _tid_ to the database.
 * `block`. Prohibit _imei_ to do OTAP.

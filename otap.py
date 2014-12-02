@@ -346,8 +346,8 @@ class Methods(object):
 
         return results
 
-    def find(self, otckey, tid):
-        ''' Find a TID in the database and show info. '''
+    def find(self, otckey, word):
+        ''' Find a word (tid or custid) in the database and show info. '''
 
         results = []
         dbconn()
@@ -361,7 +361,7 @@ class Methods(object):
                 snames[q.imei] = q.sname
 
             query = Otap.select()
-            query = query.where(Otap.tid == tid)
+            query = query.where((Otap.tid == word) | (Otap.custid == word))
             query = query.order_by(Otap.imei.asc())
             for q in query.naive():
                 results.append({

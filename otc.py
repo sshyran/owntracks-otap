@@ -65,8 +65,8 @@ class RPC(object):
     def show(self, imei=None):
         return self._request('show', imei)
 
-    def find(self, tid=None):
-        return self._request('find', tid)
+    def find(self, word):
+        return self._request('find', word)
 
     def imei(self, custid=None, tid=None):
         return self._request('imei', custid, tid)
@@ -121,7 +121,7 @@ if __name__ == '__main__':
     Usage:
       otc ping
       otc show [<imei>]
-      otc find <tid>
+      otc find <word>
       otc imei <tid> [<custid>]
       otc jars
       otc add <imei> <custid> <tid>
@@ -172,7 +172,7 @@ if __name__ == '__main__':
         if data is not None:
             print_devices(data)
     if args['find']:
-        data = rpc.find(args['<tid>'])
+        data = rpc.find(args['<word>'])
         if data is not None:
             print_devices(data)
 
