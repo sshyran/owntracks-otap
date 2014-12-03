@@ -16,6 +16,34 @@ export OTC_KEY="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 ./otc.py "$@"
 ```
 
+Invoking `otc.py` without arguments (or incorrect arguments) will display it's usage:
+
+```
+Usage:
+      otc ping
+      otc show [<imei>]
+      otc find <word>
+      otc imei <tid> [<custid>]
+      otc setcomment <imei> <text>
+      otc setflags <imei> <flagstring>
+      otc jars
+      otc add <imei> <custid> <tid>
+      otc deliver <imei> <version>
+      otc block [--all] [<imei>]
+      otc unblock [--all] [<imei>]
+      otc upload <filename> [--force]
+      otc purge <version>
+      otc versioncheck <imei> <custid> <version>
+      otc otap <imei> <custid>
+      otc showconfig <custid>
+      otc versionlog [<count>]
+      otc define <name> <settings>
+      otc undef <name>
+      otc showsets [<imei>]
+      otc set [--once] <imei> <name>
+      otc unset <imei> <name>
+```
+
 ### OTC
 
 _otc_ is the OTAP Control program which speaks JSON RPC to the OTAP daemon. The
@@ -47,6 +75,10 @@ following commands are supported:
 * `unset`. Remove assigned parameter _name_ from _imei_.
 * `showsettings`. Print a list of setting sets. If _imei_ is specified show those only.
 
+### OTAP
+
+`otap.py` is the server-side. It creates the necessary database tables upon startup and
+waits for commands to it (see `otc` above for a list of commands).
 
 ### uWSGI
 
