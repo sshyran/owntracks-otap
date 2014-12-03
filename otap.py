@@ -148,7 +148,7 @@ def imei_getflags(imei):
         imei = imei.strip()
 
         o = Otap.get(Otap.imei == imei)
-        flagstring = o.flags
+        flagstring = o.flags or ""
 
     except Otap.DoesNotExist:
         flagstring = ""
