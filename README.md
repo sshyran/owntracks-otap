@@ -7,6 +7,14 @@ This is the OTAP server for OwnTracks Greenwich.
 1. Clone the repository
 2. Run `./generate-key.py` to create a secret key.
 3. Create `otap.conf` from `.sample` and adapt. In particular, copy the secret key you generated into this, and make it available to `otc` in your environment.
+4. If you're running the server (`otap.py`) locally, use something like this:
+
+```shell
+export OTC_URL=http://localhost:8810
+export OTC_KEY="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+./otc.py "$@"
+```
 
 ### OTC
 

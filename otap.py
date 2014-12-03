@@ -847,7 +847,7 @@ def get_midlet_version(f):
 #
 # notifyURI=http://localhost/otap/id=@
 
-# "POST /dev/notify=123456789012345 HTTP/1.1" 200 0 "-" "TC65i/356612028111492 Profile/IMP-NG Configuration/CLDC-1.1"
+# "POST /dev/notify=123456789012345 HTTP/1.1" 200 0 "-" "TC65i/123456789012345 Profile/IMP-NG Configuration/CLDC-1.1"
 @bottle.route('/<custid>/notify=<clientid>', method="POST")
 def otap_notify(custid, clientid):
     device, imei = agentinfo()
@@ -885,7 +885,7 @@ def otap_notify(custid, clientid):
 # URI *must* end in ".jad" or the device will not handle OTAP
 #
 # set otapURI=http://localhost/cust/otap.jad
-# "GET /dev/otap.jad HTTP/1.1" 200 8 "-" "TC65i/356612028111492 Profile/IMP-NG Configuration/CLDC-1.1"
+# "GET /dev/otap.jad HTTP/1.1" 200 8 "-" "TC65i/123456789012345 Profile/IMP-NG Configuration/CLDC-1.1"
 #
 @bottle.route('/<custid>/otap.jad', method="GET")
 def otap_get(custid):
