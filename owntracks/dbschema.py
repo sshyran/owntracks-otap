@@ -64,6 +64,7 @@ class Otap(OTAPModel):
     deliver         = CharField(null=True, max_length=10)
     block           = IntegerField(null=False)
     lastcheck       = DateTimeField(default=datetime.datetime.now, index=True)
+    comment         = CharField(null=True, max_length=128)
 
     class Meta:
         indexes = (

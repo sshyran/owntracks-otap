@@ -342,6 +342,7 @@ class Methods(object):
                 'deliver'   : q.deliver,
                 'sname'     : snames.get(q.imei, ""),
                 'lastcheck' : utc_to_localtime(q.lastcheck),
+                'comment'   : q.comment or '',
                 })
 
         return results
@@ -373,9 +374,33 @@ class Methods(object):
                     'deliver'   : q.deliver,
                     'sname'     : snames.get(q.imei, ""),
                     'lastcheck' : utc_to_localtime(q.lastcheck),
+                    'comment'   : q.comment or '',
                     })
 
         return results
+
+    def setcomment(self, otckey, imei, text):
+        ''' set a plain text comment for IMEI '''
+
+        dbconn()
+
+        res = "not set"
+
+        if _keycheck(otckey) == True:
+            try:
+                o = Otap.get(Otap.imei == imei)
+
+                o.comment=text
+                o.save()
+
+                res = "Comment set for {0}".format(imei)
+
+            except Exception, e:
+                res = "Comment not set for {0}: {1}".format(imei, str(e))
+                notify("setcomment", res)
+                log.error(res)
+
+        return res
 
 
     def imei(self, otckey, custid, tid):

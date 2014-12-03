@@ -68,6 +68,9 @@ class RPC(object):
     def find(self, word):
         return self._request('find', word)
 
+    def setcomment(self, imei, text):
+        return self._request('setcomment', imei, text)
+
     def imei(self, custid=None, tid=None):
         return self._request('imei', custid, tid)
 
@@ -108,12 +111,12 @@ class RPC(object):
         return self._request('s_set', imei, name, bf, once)
 
 def print_devices(data):
-    print "BLOCK IMEI             CUSTID    TID  Reported   Deliver    Settings    Last chk/notif"
+    print "B IMEI             CUSTID    TID  Reported   Deliver    Settings    Last chk/notif"
     for item in data:
         if item['sname'] is None:
             item['sname'] = '-'
 
-        print "%(block)5d %(imei)-16s %(custid)-10s %(tid)-3s %(reported)-10s %(deliver)-10s %(sname)-11s %(lastcheck)s" % item
+        print "%(block)1d %(imei)-16s %(custid)-10s %(tid)-3s %(reported)-10s %(deliver)-10s %(sname)-11s %(lastcheck)s %(comment)s" % item
 
 if __name__ == '__main__':
     usage = '''OTAP Control
@@ -123,6 +126,7 @@ if __name__ == '__main__':
       otc show [<imei>]
       otc find <word>
       otc imei <tid> [<custid>]
+      otc setcomment <imei> <text>
       otc jars
       otc add <imei> <custid> <tid>
       otc deliver <imei> <version>
@@ -191,6 +195,9 @@ if __name__ == '__main__':
 
     if args['purge']:
         print rpc.purge(args['<version>'])
+
+    if args['setcomment']:
+        print rpc.setcomment(args['<imei>'], args['<text>'])
 
     if args['showconfig']:
         custid = args['<custid>']
