@@ -254,14 +254,20 @@ class Methods(object):
             if not os.path.isfile(jarfile):
                 return "No such version here"
 
+        custid = ""
+        tid    = ""
         try:
             o = Otap.get(Otap.imei == imei)
             o.deliver = version
+
+            custid = o.custid or ""
+            tid    = o.tid or ""
+
             o.save()
         except:
             return "Can't find IMEI {0} in DB".format(imei)
 
-        message = "{0} will get {1} at next OTAP".format(imei, version)
+        message = "{0}/{1}/{2} will get {3} at next OTAP".format(custid, tid, imei, version)
         notify('deliver', message)
         return message
 
