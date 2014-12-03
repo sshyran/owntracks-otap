@@ -446,6 +446,8 @@ class Methods(object):
                 o = Otap.get(Otap.imei == imei)
 
                 oldflags = o.flags
+                custid   = o.custid or ''
+                tid      = o.tid or ''
 
                 if len(flagstring) < 1:
                     flagstring = None
@@ -454,7 +456,7 @@ class Methods(object):
                 o.flags = flagstring
                 o.save()
 
-                res = "Flags on {0} changed from {1} to {2}".format(imei, oldflags, flagstring)
+                res = "Flags on {0}/{1}/{2} changed from {3} to {4}".format(custid, tid, imei, oldflags, flagstring)
                 log.info(res)
 
             except Otap.DoesNotExist:
