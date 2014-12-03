@@ -390,10 +390,15 @@ class Methods(object):
             try:
                 o = Otap.get(Otap.imei == imei)
 
+                operation = 'set'
+                if len(text) < 1:
+                    text = None
+                    operation = 'unset'
+
                 o.comment=text
                 o.save()
 
-                res = "Comment set for {0}".format(imei)
+                res = "Comment {0} for {1}".format(operation, imei)
                 log.info(res)
 
             except Exception, e:
