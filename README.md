@@ -18,6 +18,9 @@ following commands are supported:
 * `show` [_imei_]
 * `imei`. Displays the IMEI number for _tid_. Specify an optional _custid_ if needed.
 * `setcomment`. Add a _text_ comment to database for _imei_.
+* `setflags`. Add _flagsstring_ to database for _imei_.
+  * `v` Notify on versioncheck even if upgrade == 0
+
 * `deliver` _imei_ _version_ where _version_ may be any installed JAR version number, the word "`*`" which means any most recent version ("`ANY` is synonym for `*`), or "`latest`" which is the current latest version (i.e. the higest version currently displayed by the `jars` command).
 * `find`. Search for _word_ in either _custid_ or _tid_ in the otap database table.
 * `jars`. Show installed JAR versions

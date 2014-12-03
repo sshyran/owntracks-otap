@@ -71,6 +71,9 @@ class RPC(object):
     def setcomment(self, imei, text):
         return self._request('setcomment', imei, text)
 
+    def setflags(self, imei, flagstring):
+        return self._request('setflags', imei, flagstring)
+
     def imei(self, custid=None, tid=None):
         return self._request('imei', custid, tid)
 
@@ -111,12 +114,12 @@ class RPC(object):
         return self._request('s_set', imei, name, bf, once)
 
 def print_devices(data):
-    print "B IMEI             CUSTID    TID  Reported   Deliver    Settings    Last chk/notif"
+    print "B IMEI             CUSTID    TID  Reported   Deliver    Settings    FLAGS Last chk/notif"
     for item in data:
         if item['sname'] is None:
             item['sname'] = '-'
 
-        print "%(block)1d %(imei)-16s %(custid)-10s %(tid)-3s %(reported)-10s %(deliver)-10s %(sname)-11s %(lastcheck)s %(comment)s" % item
+        print "%(block)1d %(imei)-16s %(custid)-10s %(tid)-3s %(reported)-10s %(deliver)-10s %(sname)-11s %(flags)-5s %(lastcheck)-10s %(comment)s" % item
 
 if __name__ == '__main__':
     usage = '''OTAP Control
@@ -127,6 +130,7 @@ if __name__ == '__main__':
       otc find <word>
       otc imei <tid> [<custid>]
       otc setcomment <imei> <text>
+      otc setflags <imei> <flagstring>
       otc jars
       otc add <imei> <custid> <tid>
       otc deliver <imei> <version>
@@ -198,6 +202,9 @@ if __name__ == '__main__':
 
     if args['setcomment']:
         print rpc.setcomment(args['<imei>'], args['<text>'])
+
+    if args['setflags']:
+        print rpc.setflags(args['<imei>'], args['<flagstring>'])
 
     if args['showconfig']:
         custid = args['<custid>']

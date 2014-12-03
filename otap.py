@@ -137,6 +137,27 @@ def imei_settings(imei):
 
     return settings
 
+def imei_getflags(imei):
+    ''' Get the flags for IMEI and return as string or "" if no flags '''
+
+    dbconn()
+
+    flagstring = ""
+
+    try:
+        imei = imei.strip()
+
+        o = Otap.get(Otap.imei == imei)
+        flagstring = o.flags
+
+    except Otap.DoesNotExist:
+        flagstring = ""
+    except Exception, e:
+        log.error("Cannot imei_getflags({0}): {1}".format(imei, str(e)))
+        pass
+
+    log.debug("Flagstring for {0} is {1}".format(imei, flagstring))
+    return flagstring
 
 @bottle.route('/')
 def index():
@@ -343,6 +364,7 @@ class Methods(object):
                 'sname'     : snames.get(q.imei, ""),
                 'lastcheck' : utc_to_localtime(q.lastcheck),
                 'comment'   : q.comment or '',
+                'flags'     : q.flags or '',
                 })
 
         return results
@@ -375,6 +397,7 @@ class Methods(object):
                     'sname'     : snames.get(q.imei, ""),
                     'lastcheck' : utc_to_localtime(q.lastcheck),
                     'comment'   : q.comment or '',
+                    'flags'     : q.flags or '',
                     })
 
         return results
@@ -407,6 +430,44 @@ class Methods(object):
 
         notify("setcomment", res)
         return res
+
+    def setflags(self, otckey, imei, flagstring):
+        ''' set flags on IMEI '''
+
+        dbconn()
+
+        res = "not set"
+
+        if _keycheck(otckey) == True:
+            try:
+                imei = imei.strip()
+                flagstring = flagstring.strip()
+
+                o = Otap.get(Otap.imei == imei)
+
+                oldflags = o.flags
+
+                if len(flagstring) < 1:
+                    flagstring = None
+                    operation = 'unset'
+
+                o.flags = flagstring
+                o.save()
+
+                res = "Flags on {0} changed from {1} to {2}".format(imei, oldflags, flagstring)
+                log.info(res)
+
+            except Otap.DoesNotExist:
+                res = "Flags not set for {0}: IMEI does not exist".format(imei)
+
+            except Exception, e:
+                res = "Flags not set for {0}: {1}".format(imei, str(e))
+                log.error(res)
+
+        notify("setflags", res)
+        return res
+
+
 
 
     def imei(self, otckey, custid, tid):
@@ -673,6 +734,8 @@ def versioncheck(custid, word):
 
     dbconn()
 
+    flags = imei_getflags(imei)
+
     upgrade = 0
     settings = []
     new_version = ""
@@ -744,7 +807,11 @@ def versioncheck(custid, word):
         }
 
     message = "{imei} ({custid}/{tid}) has {version}; IHAVE {new_version}. upgrade={upgrade} {tstamp}".format(**item)
-    notify('version', message)
+
+    if upgrade == 0 and 'v' in flags:
+        notify('version', message)
+    elif upgrade == 1:
+        notify('version', message)
 
     return resp
 
