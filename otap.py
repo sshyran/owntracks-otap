@@ -394,12 +394,13 @@ class Methods(object):
                 o.save()
 
                 res = "Comment set for {0}".format(imei)
+                log.info(res)
 
             except Exception, e:
                 res = "Comment not set for {0}: {1}".format(imei, str(e))
-                notify("setcomment", res)
                 log.error(res)
 
+        notify("setcomment", res)
         return res
 
 
