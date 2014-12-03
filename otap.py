@@ -268,6 +268,7 @@ class Methods(object):
             return "Can't find IMEI {0} in DB".format(imei)
 
         message = "{0}/{1}/{2} will get {3} at next OTAP".format(custid, tid, imei, version)
+        log.info(message)
         notify('deliver', message)
         return message
 
