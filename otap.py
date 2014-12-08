@@ -816,6 +816,7 @@ def versioncheck(custid, word):
         }
 
     message = "{imei} ({custid}/{tid}) has {version}; IHAVE {new_version}. upgrade={upgrade} {tstamp}".format(**item)
+    log.info(message)
 
     if upgrade == 0 and 'v' in flags:
         notify('version', message)
