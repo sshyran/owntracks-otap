@@ -147,6 +147,7 @@ if __name__ == '__main__':
       otc showsets [<imei>]
       otc set [--once] <imei> <name>
       otc unset <imei> <name>
+      otc dbjson
 
       otc (-h | --help)
       otc --version
@@ -179,6 +180,11 @@ if __name__ == '__main__':
         data = rpc.show(args['<imei>'])
         if data is not None:
             print_devices(data)
+
+    if args['dbjson']:
+        data = rpc.show()
+        print json.dumps(data, indent=4)
+
     if args['find']:
         data = rpc.find(args['<word>'])
         if data is not None:
